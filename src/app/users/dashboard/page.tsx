@@ -134,7 +134,7 @@ function ReferralCard({ code, count }: { code: string; count: number }) {
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({
-        title: "Join Haventist!",
+        title: "Join haventust!",
         text: `Use my referral code ${code} to sign up and we both earn bonus credits!`,
         url: referralLink,
       });
@@ -247,9 +247,8 @@ function TxRow({
   return (
     <div className="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0">
       <div
-        className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-          isCredit ? "bg-emerald-50" : "bg-red-50"
-        }`}
+        className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isCredit ? "bg-emerald-50" : "bg-red-50"
+          }`}
       >
         {isCredit ? (
           <ArrowDownLeft className="w-4 h-4 text-emerald-600" />
@@ -262,9 +261,8 @@ function TxRow({
         <p className="text-[10px] text-gray-400 font-medium mt-0.5">{time}</p>
       </div>
       <span
-        className={`text-xs font-black shrink-0 ${
-          isCredit ? "text-emerald-600" : "text-red-500"
-        }`}
+        className={`text-xs font-black shrink-0 ${isCredit ? "text-emerald-600" : "text-red-500"
+          }`}
       >
         {amount}
       </span>
@@ -286,23 +284,20 @@ function AchievementBadge({
 }) {
   return (
     <div
-      className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border text-center transition-all ${
-        earned
+      className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border text-center transition-all ${earned
           ? "bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200"
           : "bg-gray-50 border-gray-100 opacity-50"
-      }`}
+        }`}
     >
       <div
-        className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-          earned ? "bg-gradient-to-br from-amber-400 to-orange-500" : "bg-gray-200"
-        }`}
+        className={`w-10 h-10 rounded-xl flex items-center justify-center ${earned ? "bg-gradient-to-br from-amber-400 to-orange-500" : "bg-gray-200"
+          }`}
       >
         <Icon className="w-5 h-5 text-white" />
       </div>
       <span
-        className={`text-[9px] font-bold leading-tight ${
-          earned ? "text-amber-700" : "text-gray-400"
-        }`}
+        className={`text-[9px] font-bold leading-tight ${earned ? "text-amber-700" : "text-gray-400"
+          }`}
       >
         {label}
       </span>
@@ -325,8 +320,8 @@ export default function UserDashboardPage() {
   // Ticker states (city → karat → ₹/gram)
   const [goldPrices, setGoldPrices] = useState<any>({
     Kolkata: { "24K": 7350, "22K": 6740 },
-    Mumbai:  { "24K": 7358, "22K": 6747 },
-    Delhi:   { "24K": 7372, "22K": 6758 },
+    Mumbai: { "24K": 7358, "22K": 6747 },
+    Delhi: { "24K": 7372, "22K": 6758 },
     Chennai: { "24K": 7338, "22K": 6729 },
   });
   const [activeCityIndex, setActiveCityIndex] = useState(0);
@@ -413,10 +408,10 @@ export default function UserDashboardPage() {
 
   const memberSince = user?.joinedAt
     ? new Date(user.joinedAt).toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
     : "—";
 
   // Investment summaries from live packages data
@@ -494,11 +489,10 @@ export default function UserDashboardPage() {
                   <p className="text-[9px] text-gray-400 font-semibold">Per gram &bull; 24K &amp; 22K &bull; Updated every 5 min</p>
                 </div>
               </div>
-              <span className={`text-[9px] font-black px-2.5 py-1 rounded-full border uppercase ${
-                isLiveGold
+              <span className={`text-[9px] font-black px-2.5 py-1 rounded-full border uppercase ${isLiveGold
                   ? "bg-emerald-50 text-emerald-600 border-emerald-200 animate-pulse"
                   : "bg-amber-50 text-amber-600 border-amber-100"
-              }`}>
+                }`}>
                 {isLiveGold ? "● GoldAPI Live" : "Simulated"}
               </span>
             </div>
@@ -514,11 +508,10 @@ export default function UserDashboardPage() {
                 return (
                   <div
                     key={city}
-                    className={`border rounded-2xl p-3 transition-all duration-500 cursor-pointer ${
-                      isActive
+                    className={`border rounded-2xl p-3 transition-all duration-500 cursor-pointer ${isActive
                         ? "bg-gradient-to-br from-amber-50 to-yellow-50/60 border-amber-300 shadow-md shadow-amber-100 scale-[1.02]"
                         : "bg-slate-50/50 border-gray-100 opacity-55 hover:opacity-80"
-                    }`}
+                      }`}
                     onClick={() => setActiveCityIndex(idx)}
                   >
                     <div className="flex items-center justify-between mb-1.5">
@@ -596,9 +589,8 @@ export default function UserDashboardPage() {
               <div className="flex flex-wrap gap-3">
                 <div className="bg-white/10 border border-white/10 rounded-xl px-3 py-1.5 flex items-center gap-1.5">
                   <span
-                    className={`w-2 h-2 rounded-full ${
-                      user?.status === "Active" ? "bg-emerald-400" : "bg-red-400"
-                    }`}
+                    className={`w-2 h-2 rounded-full ${user?.status === "Active" ? "bg-emerald-400" : "bg-red-400"
+                      }`}
                   />
                   <span className="text-xs font-bold">{user?.status ?? "Active"}</span>
                 </div>

@@ -22,16 +22,16 @@ interface ActivationPageProps {
 
 export default function ActivationPage({ user, onRefreshProfile }: ActivationPageProps) {
   const router = useRouter();
-  
+
   // Settings state
   const [price, setPrice] = useState("500");
   const [qrCodeUrl, setQrCodeUrl] = useState("");
-  
+
   // Form state
   const [transactionId, setTransactionId] = useState("");
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
-  
+
   // UI states
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -157,7 +157,7 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
     setTransactionId("");
     setScreenshotFile(null);
     setScreenshotPreview(null);
-    
+
     // We send a request to admin users PATCH to reset payment info
     // But since users can do it locally in the form, we can just reset user local state 
     // or let them edit and resubmit
@@ -177,7 +177,7 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
           <div className="w-full text-center md:text-left z-10">
             <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/15 mb-4 shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span className="text-[10px] font-black uppercase tracking-wider text-blue-100">Haventist Activation</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-blue-100">haventust Activation</span>
             </div>
             <h2 className="text-2xl font-black tracking-tight leading-tight mb-2">
               Activate Your Account
@@ -215,12 +215,11 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
 
         {/* Right Side: Form / Status Review */}
         <div className="md:w-1/2 p-6 sm:p-8 flex flex-col justify-between relative z-10 bg-white">
-          
+
           {/* Status Message Display */}
           {(errorMsg || successMsg) && (
-            <div className={`mb-6 p-4 rounded-2xl border text-xs font-semibold flex items-start gap-2.5 ${
-              errorMsg ? "bg-red-50 text-red-600 border-red-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"
-            }`}>
+            <div className={`mb-6 p-4 rounded-2xl border text-xs font-semibold flex items-start gap-2.5 ${errorMsg ? "bg-red-50 text-red-600 border-red-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+              }`}>
               {errorMsg ? (
                 <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
               ) : (
@@ -300,18 +299,18 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
               <h3 className="text-base font-extrabold text-gray-900 tracking-tight mb-4 flex items-center gap-1.5">
                 <CreditCard className="w-4 h-4 text-[#0b5be6]" /> Submission Details
               </h3>
-              
+
               <div className="flex flex-col gap-4">
                 {/* Upload Section */}
                 <div>
                   <label className="text-[10px] font-bold text-gray-500 block uppercase tracking-wider mb-2">Payment Screenshot Proof</label>
-                  
+
                   {screenshotPreview ? (
                     <div className="relative border border-dashed border-gray-200 rounded-2xl p-2.5 bg-[#f8fafc] flex items-center justify-between gap-3 shadow-inner">
                       <img src={screenshotPreview} alt="Screenshot Preview" className="w-16 h-16 rounded-xl object-cover border border-gray-100" />
                       <div className="flex-1 text-left min-w-0">
                         <span className="text-xs font-bold text-gray-700 block truncate">{screenshotFile?.name}</span>
-                        <span className="text-[10px] text-gray-400 block mt-0.5">{( (screenshotFile?.size ?? 0) / (1024 * 1024) ).toFixed(2)} MB</span>
+                        <span className="text-[10px] text-gray-400 block mt-0.5">{((screenshotFile?.size ?? 0) / (1024 * 1024)).toFixed(2)} MB</span>
                       </div>
                       <button
                         type="button"
@@ -387,10 +386,10 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
             <div className="w-16 h-16 rounded-full bg-blue-50 text-[#0b5be6] border border-blue-100 flex items-center justify-center mb-4 shadow-inner relative animate-bounce">
               <Sparkles className="w-8 h-8" />
             </div>
-            
+
             <h3 className="text-lg font-black text-gray-900 tracking-tight">Activate Your Account First</h3>
             <p className="text-xs text-gray-500 font-medium leading-relaxed mt-2.5 max-w-xs">
-              Welcome to Haventist! To start earning, refer members, and unlock your dashboard overview, you must first activate your ID.
+              Welcome to haventust! To start earning, refer members, and unlock your dashboard overview, you must first activate your ID.
             </p>
 
             <div className="w-full mt-5 bg-[#f8fafc] rounded-2xl border border-gray-150 p-4 text-left flex flex-col gap-3">

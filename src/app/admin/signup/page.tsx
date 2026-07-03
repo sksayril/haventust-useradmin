@@ -67,12 +67,12 @@ export default function AdminSignupPage() {
 
   return (
     <div className="w-full min-h-screen flex select-none bg-[#f8fafc]">
-      
+
       {/* ========================================================================= */}
       {/* LEFT SIDE PANEL (Admin Branding - Hidden on mobile) */}
       {/* ========================================================================= */}
       <div className="hidden lg:flex w-1/2 bg-gradient-to-tr from-[#0a56e3] via-[#083ca3] to-[#041a4a] text-white p-12 flex-col justify-between relative overflow-hidden">
-        
+
         <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-blue-400/20 rounded-full blur-3xl" />
         <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#ef9f15]/10 rounded-full blur-3xl" />
@@ -82,7 +82,7 @@ export default function AdminSignupPage() {
             H
           </div>
           <div>
-            <h2 className="text-xl font-bold tracking-wide">Haventist</h2>
+            <h2 className="text-xl font-bold tracking-wide">haventust</h2>
             <p className="text-[10px] text-blue-200/90 font-medium tracking-wider uppercase">Admin Control Panel</p>
           </div>
         </div>
@@ -115,7 +115,7 @@ export default function AdminSignupPage() {
         </div>
 
         <div className="text-xs text-blue-200/60 font-medium relative z-10 flex justify-between items-center">
-          <span>&copy; 2026 Haventist Inc.</span>
+          <span>&copy; 2026 haventust Inc.</span>
           <div className="flex gap-4">
             <span className="hover:text-white cursor-pointer transition-colors">Security</span>
             <span className="hover:text-white cursor-pointer transition-colors">Compliance</span>
@@ -127,16 +127,16 @@ export default function AdminSignupPage() {
       {/* RIGHT SIDE PANEL (Signup Form) */}
       {/* ========================================================================= */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 py-12 md:px-12 bg-white relative">
-        
+
         <div className="lg:hidden absolute top-6 left-6 flex items-center gap-2">
           <div className="bg-[#0b5be6] text-white font-black w-8 h-8 rounded-lg flex items-center justify-center text-lg shadow-md">
             H
           </div>
-          <span className="font-bold text-gray-800 tracking-wide text-sm">Haventist Admin</span>
+          <span className="font-bold text-gray-800 tracking-wide text-sm">haventust Admin</span>
         </div>
 
         <div className="w-full max-w-md">
-          
+
           <div className="w-14 h-14 bg-gradient-to-br from-[#0b5be6] to-[#073ca2] text-white rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-blue-500/20">
             <ShieldAlert className="w-7 h-7" />
           </div>
@@ -172,7 +172,7 @@ export default function AdminSignupPage() {
             <div>
               <label className="text-xs font-bold text-gray-700 block mb-2">Admin Email</label>
               <div className="relative">
-                <input type="email" required placeholder="officer@haventist.com" value={email} onChange={(e) => setEmail(e.target.value)}
+                <input type="email" required placeholder="officer@haventust.com" value={email} onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-[#f8fafc] text-sm text-gray-800 pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:bg-white focus:border-[#0b5be6] focus:outline-none transition-all duration-200"
                 />
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

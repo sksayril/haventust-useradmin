@@ -39,11 +39,10 @@ function Toast({
 
   return (
     <div
-      className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-semibold max-w-sm animate-slide-in ${
-        type === "success"
+      className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-semibold max-w-sm animate-slide-in ${type === "success"
           ? "bg-emerald-50 text-emerald-700 border-emerald-200"
           : "bg-red-50 text-red-600 border-red-200"
-      }`}
+        }`}
     >
       {type === "success" ? (
         <CheckCircle className="w-4.5 h-4.5 shrink-0" />
@@ -462,7 +461,7 @@ export default function SignupPage() {
             H
           </div>
           <div>
-            <h2 className="text-xl font-bold tracking-wide">Haventist</h2>
+            <h2 className="text-xl font-bold tracking-wide">haventust</h2>
             <p className="text-[10px] text-blue-200/90 font-medium tracking-wider uppercase">
               Invest • Grow • Earn
             </p>
@@ -486,7 +485,7 @@ export default function SignupPage() {
 
           <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-lg">
             <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" /> What you get with Haventist:
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" /> What you get with haventust:
             </h3>
             <ul className="flex flex-col gap-3 text-xs text-blue-100 font-medium">
               {[
@@ -519,7 +518,7 @@ export default function SignupPage() {
         </div>
 
         <div className="text-xs text-blue-200/60 font-medium relative z-10 flex justify-between items-center">
-          <span>&copy; 2026 Haventist Inc.</span>
+          <span>&copy; 2026 haventust Inc.</span>
           <div className="flex gap-4">
             <span className="hover:text-white cursor-pointer transition-colors">Privacy</span>
             <span className="hover:text-white cursor-pointer transition-colors">Terms</span>
@@ -534,7 +533,7 @@ export default function SignupPage() {
           <div className="bg-blue-600 text-white font-black w-8 h-8 rounded-lg flex items-center justify-center text-lg shadow-md">
             H
           </div>
-          <span className="font-bold text-gray-800 tracking-wide text-sm">Haventist</span>
+          <span className="font-bold text-gray-800 tracking-wide text-sm">haventust</span>
         </div>
 
         <Suspense

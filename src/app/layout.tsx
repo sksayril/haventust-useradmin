@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Haventist - Invest, Grow, Earn",
+  title: "haventust - Invest, Grow, Earn",
   description: "Bootstrap Next.js dashboard with responsive views",
 };
 

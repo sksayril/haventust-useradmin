@@ -81,11 +81,10 @@ function Toast({
 
   return (
     <div
-      className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-semibold max-w-sm animate-slide-in ${
-        type === "success"
+      className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-semibold max-w-sm animate-slide-in ${type === "success"
           ? "bg-emerald-50 text-emerald-700 border-emerald-200"
           : "bg-red-50 text-red-600 border-red-200"
-      }`}
+        }`}
     >
       {type === "success" ? (
         <CheckCircle className="w-4 h-4 shrink-0" />
@@ -533,18 +532,18 @@ export default function AdminDashboard() {
     activePanel === "dashboard"
       ? "Dashboard"
       : activePanel === "users"
-      ? "User Management"
-      : activePanel === "payment-setup"
-      ? "Payment Setup"
-      : activePanel === "pending-packages"
-      ? "Package Approvals"
-      : activePanel === "deposit-requests"
-      ? "Deposit Requests"
-      : activePanel === "transactions"
-      ? "Transaction Auditing"
-      : activePanel === "payout-runs"
-      ? "Affiliate Payout Console"
-      : "Settings";
+        ? "User Management"
+        : activePanel === "payment-setup"
+          ? "Payment Setup"
+          : activePanel === "pending-packages"
+            ? "Package Approvals"
+            : activePanel === "deposit-requests"
+              ? "Deposit Requests"
+              : activePanel === "transactions"
+                ? "Transaction Auditing"
+                : activePanel === "payout-runs"
+                  ? "Affiliate Payout Console"
+                  : "Settings";
 
   const filteredUsers = users.filter(
     (u) =>
@@ -584,7 +583,7 @@ export default function AdminDashboard() {
             ].map((item) => {
               const Icon = item.icon;
               const isActive = activePanel === item.key;
-              
+
               let badge = null;
               if (item.key === "users" && stats) {
                 badge = stats.totalUsers;
@@ -603,11 +602,10 @@ export default function AdminDashboard() {
                 <button
                   key={item.key}
                   onClick={() => setActivePanel(item.key as typeof activePanel)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    isActive
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isActive
                       ? "bg-white/15 text-white shadow-inner border border-white/10"
                       : "text-sky-100/70 hover:text-white hover:bg-white/5"
-                  }`}
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   <span>{item.label}</span>
@@ -630,7 +628,7 @@ export default function AdminDashboard() {
             </div>
             <div className="text-left flex-1 min-w-0">
               <span className="text-xs font-extrabold text-white block truncate">Root Admin</span>
-              <span className="text-[10px] text-sky-200/70 block truncate">admin@haventist.com</span>
+              <span className="text-[10px] text-sky-200/70 block truncate">admin@haventust.com</span>
             </div>
             <button onClick={handleLogout} className="text-sky-200 hover:text-white transition-colors p-1 cursor-pointer">
               <LogOut className="w-4 h-4" />
@@ -671,9 +669,8 @@ export default function AdminDashboard() {
                     <button
                       key={item.key}
                       onClick={() => { setActivePanel(item.key as typeof activePanel); setIsMobileMenuOpen(false); }}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        isActive ? "bg-white/15 text-white border border-white/10" : "text-sky-100/70 hover:bg-white/5"
-                      }`}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isActive ? "bg-white/15 text-white border border-white/10" : "text-sky-100/70 hover:bg-white/5"
+                        }`}
                     >
                       <Icon className="w-4 h-4" />
                       <span>{item.label}</span>
@@ -899,9 +896,8 @@ export default function AdminDashboard() {
                       </div>
                       <button
                         onClick={item.toggle}
-                        className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-300 relative focus:outline-none cursor-pointer shrink-0 ${
-                          item.state ? "bg-[#0b5be6]" : "bg-gray-200"
-                        }`}
+                        className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-300 relative focus:outline-none cursor-pointer shrink-0 ${item.state ? "bg-[#0b5be6]" : "bg-gray-200"
+                          }`}
                       >
                         <div className={`bg-white w-5 h-5 rounded-full shadow-md transition-transform duration-300 ${item.state ? "translate-x-5" : "translate-x-0"}`} />
                       </button>
@@ -1036,13 +1032,12 @@ export default function AdminDashboard() {
                           <td className="py-3.5 text-center text-gray-400 font-bold">{u.joined}</td>
                           <td className="py-3.5 text-center">
                             <span
-                              className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${
-                                u.status === "Active"
+                              className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${u.status === "Active"
                                   ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
                                   : u.status === "Suspended"
-                                  ? "bg-red-50 text-red-500 border border-red-100"
-                                  : "bg-amber-50 text-amber-600 border border-amber-100"
-                              }`}
+                                    ? "bg-red-50 text-red-500 border border-red-100"
+                                    : "bg-amber-50 text-amber-600 border border-amber-100"
+                                }`}
                             >
                               {u.status === "PendingActivation" ? "Pending Activation" : u.status}
                             </span>
@@ -1072,11 +1067,10 @@ export default function AdminDashboard() {
                             ) : (
                               <button
                                 onClick={() => toggleUserStatus(u)}
-                                className={`font-extrabold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer active:scale-95 transition-transform ${
-                                  u.status === "Active"
+                                className={`font-extrabold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer active:scale-95 transition-transform ${u.status === "Active"
                                     ? "bg-red-50 hover:bg-red-100 text-red-500"
                                     : "bg-emerald-50 hover:bg-emerald-100 text-emerald-600"
-                                }`}
+                                  }`}
                               >
                                 {u.status === "Active" ? (
                                   <><Ban className="w-3 h-3" /><span>Suspend</span></>
@@ -1228,7 +1222,7 @@ export default function AdminDashboard() {
               <div className="flex flex-col gap-4">
                 <div>
                   <label className="text-[10px] font-bold text-gray-500 block uppercase tracking-wider mb-2">Root System Name</label>
-                  <input type="text" defaultValue="Haventist Affiliate Portal"
+                  <input type="text" defaultValue="haventust Affiliate Portal"
                     className="w-full bg-[#f8fafc] text-gray-800 text-xs font-bold p-3 rounded-xl border border-gray-200 focus:border-[#0b5be6] focus:outline-none" />
                 </div>
                 <div>
@@ -1251,200 +1245,197 @@ export default function AdminDashboard() {
         {activePanel === "pending-packages" && (() => {
           const pendingOnly = pendingPackages.filter((p) => p.status === "Pending");
           const allPackages = pendingPackages;
-          const [pkgTab, setPkgTab] = ["pending", (v: string) => {}]; // placeholder
+          const [pkgTab, setPkgTab] = ["pending", (v: string) => { }]; // placeholder
           return (
-          <div className="flex flex-col gap-6 text-left">
-            {/* Header with refresh */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-black text-gray-900 tracking-tight">Package Approvals</h1>
-                <p className="text-xs text-gray-500 font-semibold mt-0.5">Approve or reject gold jewelry and land booking purchase requests</p>
-              </div>
-              <button
-                onClick={fetchPendingPackages}
-                disabled={isLoadingPackages}
-                className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-[#f3f7fd] hover:text-[#0b5be6] active:scale-95 transition-all cursor-pointer shadow-sm disabled:opacity-50"
-              >
-                <RefreshCw className={`w-4 h-4 ${isLoadingPackages ? "animate-spin" : ""}`} />
-                Refresh
-              </button>
-            </div>
-
-            {/* Stats Row */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 text-center">
-                <span className="text-2xl font-black text-amber-600">{pendingOnly.length}</span>
-                <p className="text-[10px] text-amber-500 font-bold uppercase tracking-wider mt-0.5">Pending</p>
-              </div>
-              <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-center">
-                <span className="text-2xl font-black text-emerald-600">{allPackages.filter(p => p.status === "Approved").length}</span>
-                <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider mt-0.5">Approved</p>
-              </div>
-              <div className="bg-red-50 border border-red-100 rounded-2xl p-4 text-center">
-                <span className="text-2xl font-black text-red-500">{allPackages.filter(p => p.status === "Rejected").length}</span>
-                <p className="text-[10px] text-red-400 font-bold uppercase tracking-wider mt-0.5">Rejected</p>
-              </div>
-            </div>
-
-            {/* Pending Requests */}
-            <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
-              <div className="flex items-center justify-between border-b border-gray-50 pb-4 mb-4">
-                <h3 className="text-sm font-extrabold text-gray-900">Pending Purchase Requests</h3>
-                <span className="bg-amber-100 text-amber-700 text-[10px] font-black px-3 py-1 rounded-full">
-                  {pendingOnly.length} Awaiting
-                </span>
-              </div>
-
-              {isLoadingPackages ? (
-                <div className="py-10 text-center text-xs text-gray-400 font-bold uppercase tracking-wider animate-pulse">Loading…</div>
-              ) : pendingOnly.length === 0 ? (
-                <div className="py-12 text-center">
-                  <CheckCircle className="w-10 h-10 text-emerald-300 mx-auto mb-2" />
-                  <p className="text-xs text-gray-400 font-semibold">No pending package requests. All clear!</p>
+            <div className="flex flex-col gap-6 text-left">
+              {/* Header with refresh */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-black text-gray-900 tracking-tight">Package Approvals</h1>
+                  <p className="text-xs text-gray-500 font-semibold mt-0.5">Approve or reject gold jewelry and land booking purchase requests</p>
                 </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-50">
-                        <th className="pb-3 pr-3">User</th>
-                        <th className="pb-3">Package</th>
-                        <th className="pb-3 text-right">Amount</th>
-                        <th className="pb-3 text-center">Return Rate</th>
-                        <th className="pb-3 text-center">Receipt / Proof</th>
-                        <th className="pb-3 text-center">Submitted</th>
-                        <th className="pb-3 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50 text-xs font-medium text-gray-700">
-                      {pendingOnly.map((p) => (
-                        <tr key={p._id} className="hover:bg-[#f8faff] transition-colors">
-                          {/* User */}
-                          <td className="py-4 pr-3">
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-full bg-blue-50 text-[#0b5be6] font-black text-[10px] flex items-center justify-center border border-blue-100 shrink-0">
-                                {p.userId?.name ? p.userId.name.split(" ").map((w: string) => w[0]).join("").slice(0,2) : "U"}
-                              </div>
-                              <div className="min-w-0">
-                                <span className="font-bold text-gray-900 block leading-tight truncate max-w-[120px]">{p.userId?.name || "Unknown"}</span>
-                                <span className="text-[9px] text-gray-400 block mt-0.5 truncate max-w-[120px]">{p.userId?.email || "—"}</span>
-                                <span className="text-[9px] text-gray-400 block">{p.userId?.phone || ""}</span>
-                              </div>
-                            </div>
-                          </td>
-                          {/* Package */}
-                          <td className="py-4">
-                            <span className={`inline-block px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border ${
-                              p.type === "Gold"
-                                ? "bg-yellow-50 text-yellow-700 border-yellow-100"
-                                : "bg-emerald-50 text-emerald-700 border-emerald-100"
-                            }`}>{p.type}</span>
-                          </td>
-                          {/* Amount */}
-                          <td className="py-4 text-right font-black text-gray-900">
-                            ₹{p.amount?.toLocaleString("en-IN")}
-                          </td>
-                          {/* Return Rate */}
-                          <td className="py-4 text-center text-[#0b5be6] font-extrabold">
-                            {((p.monthlyReturnRate || 0) * 100).toFixed(1)}% / mo
-                          </td>
-                          {/* Receipt */}
-                          <td className="py-4 text-center">
-                            <div className="flex flex-col items-center gap-1">
-                              {p.paymentTransactionId && (
-                                <span className="bg-slate-100 text-gray-600 text-[9px] px-2 py-0.5 rounded font-mono border border-gray-200 max-w-[100px] truncate block">
-                                  {p.paymentTransactionId}
-                                </span>
-                              )}
-                              {p.paymentScreenshotUrl ? (
-                                <a href={p.paymentScreenshotUrl} target="_blank" rel="noreferrer"
-                                  className="text-[#0b5be6] hover:underline text-[9px] font-bold flex items-center gap-1">
-                                  <Eye className="w-3 h-3" /> View Proof
-                                </a>
-                              ) : (
-                                <span className="text-[9px] text-gray-300 font-semibold">No receipt</span>
-                              )}
-                            </div>
-                          </td>
-                          {/* Date */}
-                          <td className="py-4 text-center text-gray-400 font-semibold">
-                            {new Date(p.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
-                          </td>
-                          {/* Actions */}
-                          <td className="py-4">
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                onClick={() => rejectPackage(p._id)}
-                                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 text-[10px] font-black cursor-pointer active:scale-95 transition-all border border-red-100"
-                              >
-                                <X className="w-3.5 h-3.5" /> Reject
-                              </button>
-                              <button
-                                onClick={() => approvePackage(p._id)}
-                                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-black cursor-pointer active:scale-95 transition-all border border-emerald-200"
-                              >
-                                <Check className="w-3.5 h-3.5" /> Approve
-                              </button>
-                            </div>
-                          </td>
+                <button
+                  onClick={fetchPendingPackages}
+                  disabled={isLoadingPackages}
+                  className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-[#f3f7fd] hover:text-[#0b5be6] active:scale-95 transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isLoadingPackages ? "animate-spin" : ""}`} />
+                  Refresh
+                </button>
+              </div>
+
+              {/* Stats Row */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 text-center">
+                  <span className="text-2xl font-black text-amber-600">{pendingOnly.length}</span>
+                  <p className="text-[10px] text-amber-500 font-bold uppercase tracking-wider mt-0.5">Pending</p>
+                </div>
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-center">
+                  <span className="text-2xl font-black text-emerald-600">{allPackages.filter(p => p.status === "Approved").length}</span>
+                  <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider mt-0.5">Approved</p>
+                </div>
+                <div className="bg-red-50 border border-red-100 rounded-2xl p-4 text-center">
+                  <span className="text-2xl font-black text-red-500">{allPackages.filter(p => p.status === "Rejected").length}</span>
+                  <p className="text-[10px] text-red-400 font-bold uppercase tracking-wider mt-0.5">Rejected</p>
+                </div>
+              </div>
+
+              {/* Pending Requests */}
+              <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+                <div className="flex items-center justify-between border-b border-gray-50 pb-4 mb-4">
+                  <h3 className="text-sm font-extrabold text-gray-900">Pending Purchase Requests</h3>
+                  <span className="bg-amber-100 text-amber-700 text-[10px] font-black px-3 py-1 rounded-full">
+                    {pendingOnly.length} Awaiting
+                  </span>
+                </div>
+
+                {isLoadingPackages ? (
+                  <div className="py-10 text-center text-xs text-gray-400 font-bold uppercase tracking-wider animate-pulse">Loading…</div>
+                ) : pendingOnly.length === 0 ? (
+                  <div className="py-12 text-center">
+                    <CheckCircle className="w-10 h-10 text-emerald-300 mx-auto mb-2" />
+                    <p className="text-xs text-gray-400 font-semibold">No pending package requests. All clear!</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-50">
+                          <th className="pb-3 pr-3">User</th>
+                          <th className="pb-3">Package</th>
+                          <th className="pb-3 text-right">Amount</th>
+                          <th className="pb-3 text-center">Return Rate</th>
+                          <th className="pb-3 text-center">Receipt / Proof</th>
+                          <th className="pb-3 text-center">Submitted</th>
+                          <th className="pb-3 text-right">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50 text-xs font-medium text-gray-700">
+                        {pendingOnly.map((p) => (
+                          <tr key={p._id} className="hover:bg-[#f8faff] transition-colors">
+                            {/* User */}
+                            <td className="py-4 pr-3">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-full bg-blue-50 text-[#0b5be6] font-black text-[10px] flex items-center justify-center border border-blue-100 shrink-0">
+                                  {p.userId?.name ? p.userId.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2) : "U"}
+                                </div>
+                                <div className="min-w-0">
+                                  <span className="font-bold text-gray-900 block leading-tight truncate max-w-[120px]">{p.userId?.name || "Unknown"}</span>
+                                  <span className="text-[9px] text-gray-400 block mt-0.5 truncate max-w-[120px]">{p.userId?.email || "—"}</span>
+                                  <span className="text-[9px] text-gray-400 block">{p.userId?.phone || ""}</span>
+                                </div>
+                              </div>
+                            </td>
+                            {/* Package */}
+                            <td className="py-4">
+                              <span className={`inline-block px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border ${p.type === "Gold"
+                                  ? "bg-yellow-50 text-yellow-700 border-yellow-100"
+                                  : "bg-emerald-50 text-emerald-700 border-emerald-100"
+                                }`}>{p.type}</span>
+                            </td>
+                            {/* Amount */}
+                            <td className="py-4 text-right font-black text-gray-900">
+                              ₹{p.amount?.toLocaleString("en-IN")}
+                            </td>
+                            {/* Return Rate */}
+                            <td className="py-4 text-center text-[#0b5be6] font-extrabold">
+                              {((p.monthlyReturnRate || 0) * 100).toFixed(1)}% / mo
+                            </td>
+                            {/* Receipt */}
+                            <td className="py-4 text-center">
+                              <div className="flex flex-col items-center gap-1">
+                                {p.paymentTransactionId && (
+                                  <span className="bg-slate-100 text-gray-600 text-[9px] px-2 py-0.5 rounded font-mono border border-gray-200 max-w-[100px] truncate block">
+                                    {p.paymentTransactionId}
+                                  </span>
+                                )}
+                                {p.paymentScreenshotUrl ? (
+                                  <a href={p.paymentScreenshotUrl} target="_blank" rel="noreferrer"
+                                    className="text-[#0b5be6] hover:underline text-[9px] font-bold flex items-center gap-1">
+                                    <Eye className="w-3 h-3" /> View Proof
+                                  </a>
+                                ) : (
+                                  <span className="text-[9px] text-gray-300 font-semibold">No receipt</span>
+                                )}
+                              </div>
+                            </td>
+                            {/* Date */}
+                            <td className="py-4 text-center text-gray-400 font-semibold">
+                              {new Date(p.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                            </td>
+                            {/* Actions */}
+                            <td className="py-4">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => rejectPackage(p._id)}
+                                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 text-[10px] font-black cursor-pointer active:scale-95 transition-all border border-red-100"
+                                >
+                                  <X className="w-3.5 h-3.5" /> Reject
+                                </button>
+                                <button
+                                  onClick={() => approvePackage(p._id)}
+                                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-black cursor-pointer active:scale-95 transition-all border border-emerald-200"
+                                >
+                                  <Check className="w-3.5 h-3.5" /> Approve
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
 
-            {/* All Packages History */}
-            <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
-              <h3 className="text-sm font-extrabold text-gray-900 border-b border-gray-50 pb-4 mb-4">All Package Requests History</h3>
-              {allPackages.length === 0 ? (
-                <div className="py-8 text-center text-xs text-gray-400 font-semibold">No package requests found.</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-50">
-                        <th className="pb-3 pr-3">User</th>
-                        <th className="pb-3">Package</th>
-                        <th className="pb-3 text-right">Amount</th>
-                        <th className="pb-3 text-center">Return Rate</th>
-                        <th className="pb-3 text-center">Submitted</th>
-                        <th className="pb-3 text-center">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50 text-xs font-medium text-gray-700">
-                      {allPackages.map((p) => (
-                        <tr key={p._id} className="hover:bg-[#f8faff] transition-colors">
-                          <td className="py-3.5 pr-3">
-                            <span className="font-bold text-gray-900 block">{p.userId?.name || "Unknown"}</span>
-                            <span className="text-[9px] text-gray-400">{p.userId?.email || "—"}</span>
-                          </td>
-                          <td className="py-3.5">
-                            <span className={`inline-block px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border ${
-                              p.type === "Gold" ? "bg-yellow-50 text-yellow-700 border-yellow-100" : "bg-emerald-50 text-emerald-700 border-emerald-100"
-                            }`}>{p.type}</span>
-                          </td>
-                          <td className="py-3.5 text-right font-black text-gray-900">₹{p.amount?.toLocaleString("en-IN")}</td>
-                          <td className="py-3.5 text-center text-[#0b5be6] font-extrabold">{((p.monthlyReturnRate || 0) * 100).toFixed(1)}% / mo</td>
-                          <td className="py-3.5 text-center text-gray-400 font-semibold">
-                            {new Date(p.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
-                          </td>
-                          <td className="py-3.5 text-center">
-                            <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${
-                              p.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100"
-                              : p.status === "Rejected" ? "bg-red-50 text-red-500 border-red-100"
-                              : "bg-amber-50 text-amber-600 border-amber-100 animate-pulse"
-                            }`}>{p.status}</span>
-                          </td>
+              {/* All Packages History */}
+              <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+                <h3 className="text-sm font-extrabold text-gray-900 border-b border-gray-50 pb-4 mb-4">All Package Requests History</h3>
+                {allPackages.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-gray-400 font-semibold">No package requests found.</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-50">
+                          <th className="pb-3 pr-3">User</th>
+                          <th className="pb-3">Package</th>
+                          <th className="pb-3 text-right">Amount</th>
+                          <th className="pb-3 text-center">Return Rate</th>
+                          <th className="pb-3 text-center">Submitted</th>
+                          <th className="pb-3 text-center">Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+                      </thead>
+                      <tbody className="divide-y divide-gray-50 text-xs font-medium text-gray-700">
+                        {allPackages.map((p) => (
+                          <tr key={p._id} className="hover:bg-[#f8faff] transition-colors">
+                            <td className="py-3.5 pr-3">
+                              <span className="font-bold text-gray-900 block">{p.userId?.name || "Unknown"}</span>
+                              <span className="text-[9px] text-gray-400">{p.userId?.email || "—"}</span>
+                            </td>
+                            <td className="py-3.5">
+                              <span className={`inline-block px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border ${p.type === "Gold" ? "bg-yellow-50 text-yellow-700 border-yellow-100" : "bg-emerald-50 text-emerald-700 border-emerald-100"
+                                }`}>{p.type}</span>
+                            </td>
+                            <td className="py-3.5 text-right font-black text-gray-900">₹{p.amount?.toLocaleString("en-IN")}</td>
+                            <td className="py-3.5 text-center text-[#0b5be6] font-extrabold">{((p.monthlyReturnRate || 0) * 100).toFixed(1)}% / mo</td>
+                            <td className="py-3.5 text-center text-gray-400 font-semibold">
+                              {new Date(p.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                            </td>
+                            <td className="py-3.5 text-center">
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${p.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                                  : p.status === "Rejected" ? "bg-red-50 text-red-500 border-red-100"
+                                    : "bg-amber-50 text-amber-600 border-amber-100 animate-pulse"
+                                }`}>{p.status}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
           );
         })()}
 
@@ -1497,10 +1488,10 @@ export default function AdminDashboard() {
                             {u.paymentTransactionId}
                           </td>
                           <td className="py-4 text-center">
-                            <a 
-                              href={u.paymentScreenshotUrl || "#"} 
-                              target="_blank" 
-                              rel="noreferrer" 
+                            <a
+                              href={u.paymentScreenshotUrl || "#"}
+                              target="_blank"
+                              rel="noreferrer"
                               className="text-[#0b5be6] hover:underline text-[9px] font-bold flex items-center justify-center gap-1"
                             >
                               <Eye className="w-3.5 h-3.5" /> View Receipt
@@ -1571,11 +1562,10 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                           <td className="py-4">
-                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${
-                              tx.type === "Deposit"
+                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${tx.type === "Deposit"
                                 ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
                                 : "bg-red-50 text-red-500 border border-red-100"
-                            }`}>
+                              }`}>
                               {tx.type}
                             </span>
                           </td>
@@ -1657,11 +1647,10 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                           <td className="py-4">
-                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${
-                              tx.type === "Deposit"
+                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${tx.type === "Deposit"
                                 ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
                                 : "bg-red-50 text-red-500 border border-red-100"
-                            }`}>
+                              }`}>
                               {tx.type}
                             </span>
                           </td>
@@ -1679,13 +1668,12 @@ export default function AdminDashboard() {
                             })}
                           </td>
                           <td className="py-4 text-right">
-                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${
-                              tx.status === "Success"
+                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${tx.status === "Success"
                                 ? "bg-emerald-100 text-emerald-700"
                                 : tx.status === "Failed"
-                                ? "bg-red-100 text-red-700"
-                                : "bg-amber-100 text-amber-700"
-                            }`}>
+                                  ? "bg-red-100 text-red-700"
+                                  : "bg-amber-100 text-amber-700"
+                              }`}>
                               {tx.status}
                             </span>
                           </td>
@@ -1738,21 +1726,19 @@ export default function AdminDashboard() {
               <div className="flex gap-2 border-b border-gray-100 pb-px">
                 <button
                   onClick={() => setDepositActiveTab("pending")}
-                  className={`pb-3 px-4 text-xs font-bold transition-all relative border-b-2 ${
-                    depositActiveTab === "pending"
+                  className={`pb-3 px-4 text-xs font-bold transition-all relative border-b-2 ${depositActiveTab === "pending"
                       ? "border-[#0b5be6] text-[#0b5be6]"
                       : "border-transparent text-gray-400 hover:text-gray-700"
-                  }`}
+                    }`}
                 >
                   Pending Deposits ({pendingDeposits.length})
                 </button>
                 <button
                   onClick={() => setDepositActiveTab("history")}
-                  className={`pb-3 px-4 text-xs font-bold transition-all relative border-b-2 ${
-                    depositActiveTab === "history"
+                  className={`pb-3 px-4 text-xs font-bold transition-all relative border-b-2 ${depositActiveTab === "history"
                       ? "border-[#0b5be6] text-[#0b5be6]"
                       : "border-transparent text-gray-400 hover:text-gray-700"
-                  }`}
+                    }`}
                 >
                   All Deposits History ({historyDeposits.length})
                 </button>
@@ -1914,13 +1900,12 @@ export default function AdminDashboard() {
                                   })}
                                 </td>
                                 <td className="py-4 text-right">
-                                  <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${
-                                    tx.status === "Success"
+                                  <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${tx.status === "Success"
                                       ? "bg-emerald-100 text-emerald-700"
                                       : tx.status === "Failed"
-                                      ? "bg-red-100 text-red-700"
-                                      : "bg-amber-100 text-amber-700"
-                                  }`}>
+                                        ? "bg-red-100 text-red-700"
+                                        : "bg-amber-100 text-amber-700"
+                                    }`}>
                                     {tx.status}
                                   </span>
                                 </td>
@@ -2244,13 +2229,12 @@ export default function AdminDashboard() {
                   <div>
                     <span className="text-[10px] text-gray-400 font-bold block uppercase tracking-wider">Status</span>
                     <div>
-                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase mt-1 ${
-                        selectedDetailUser.status === "Active"
+                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase mt-1 ${selectedDetailUser.status === "Active"
                           ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
                           : selectedDetailUser.status === "Suspended"
-                          ? "bg-red-50 text-red-500 border border-red-100"
-                          : "bg-amber-50 text-amber-600 border border-amber-100"
-                      }`}>
+                            ? "bg-red-50 text-red-500 border border-red-100"
+                            : "bg-amber-50 text-amber-600 border border-amber-100"
+                        }`}>
                         {selectedDetailUser.status === "PendingActivation" ? "Pending Activation" : selectedDetailUser.status}
                       </span>
                     </div>

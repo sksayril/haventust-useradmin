@@ -32,11 +32,10 @@ function Toast({
 
   return (
     <div
-      className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-semibold max-w-sm animate-slide-in ${
-        type === "success"
+      className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-semibold max-w-sm animate-slide-in ${type === "success"
           ? "bg-emerald-50 text-emerald-700 border-emerald-200"
           : "bg-red-50 text-red-600 border-red-200"
-      }`}
+        }`}
     >
       {type === "success" ? (
         <CheckCircle className="w-4.5 h-4.5 shrink-0" />
@@ -114,7 +113,7 @@ export default function LoginPage() {
             H
           </div>
           <div>
-            <h2 className="text-xl font-bold tracking-wide">Haventist</h2>
+            <h2 className="text-xl font-bold tracking-wide">haventust</h2>
             <p className="text-[10px] text-blue-200/90 font-medium tracking-wider uppercase">
               Invest • Grow • Earn
             </p>
@@ -144,7 +143,7 @@ export default function LoginPage() {
               </svg>
             </div>
             <p className="text-sm italic text-blue-50 leading-relaxed mb-4">
-              &quot;Haventist has completely transformed my career path. The investment plans are
+              &quot;haventust has completely transformed my career path. The investment plans are
               outstanding, and the affiliate wallet payouts are instant.&quot;
             </p>
             <div className="flex items-center gap-3">
@@ -160,7 +159,7 @@ export default function LoginPage() {
         </div>
 
         <div className="text-xs text-blue-200/60 font-medium relative z-10 flex justify-between items-center">
-          <span>&copy; 2026 Haventist Inc.</span>
+          <span>&copy; 2026 haventust Inc.</span>
           <div className="flex gap-4">
             <span className="hover:text-white cursor-pointer transition-colors">Privacy</span>
             <span className="hover:text-white cursor-pointer transition-colors">Terms</span>
@@ -175,7 +174,7 @@ export default function LoginPage() {
           <div className="bg-blue-600 text-white font-black w-8 h-8 rounded-lg flex items-center justify-center text-lg shadow-md">
             H
           </div>
-          <span className="font-bold text-gray-800 tracking-wide text-sm">Haventist</span>
+          <span className="font-bold text-gray-800 tracking-wide text-sm">haventust</span>
         </div>
 
         <div className="w-full max-w-md">

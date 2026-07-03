@@ -72,7 +72,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
             H
           </div>
           <div>
-            <h2 className="text-xl font-bold tracking-wide">Haventist</h2>
+            <h2 className="text-xl font-bold tracking-wide">haventust</h2>
             <p className="text-[10px] text-blue-200/90 font-medium tracking-wider uppercase">
               Learn • Grow • Earn
             </p>
@@ -86,7 +86,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
               pathname === item.href ||
               (item.href !== "/" && pathname.startsWith(item.href));
             const Icon = item.icon;
-            
+
             // Check if this menu item is locked
             const isLocked = isPending && item.href !== "/" && item.href !== "/users/dashboard";
 
@@ -111,25 +111,22 @@ export default function Sidebar({ onClose }: SidebarProps) {
                 key={item.name}
                 href={item.href}
                 onClick={onClose}
-                className={`group flex items-center justify-between py-2.5 px-6 transition-all text-sm ${
-                  isActive
+                className={`group flex items-center justify-between py-2.5 px-6 transition-all text-sm ${isActive
                     ? "bg-white text-[#0c4cc6] font-semibold rounded-l-full ml-4 shadow-md"
                     : "text-blue-100 hover:text-white hover:bg-white/10 rounded-lg mx-4"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon
-                    className={`w-5 h-5 shrink-0 ${
-                      isActive ? "text-[#0c4cc6]" : "text-blue-200 group-hover:text-white"
-                    }`}
+                    className={`w-5 h-5 shrink-0 ${isActive ? "text-[#0c4cc6]" : "text-blue-200 group-hover:text-white"
+                      }`}
                   />
                   <span>{item.name}</span>
                 </div>
                 {item.badge && (
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      isActive ? "bg-red-500 text-white" : "bg-orange-500 text-white"
-                    }`}
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? "bg-red-500 text-white" : "bg-orange-500 text-white"
+                      }`}
                   >
                     {item.badge}
                   </span>
