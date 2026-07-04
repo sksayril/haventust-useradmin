@@ -45,6 +45,7 @@ export default function PackagesPage() {
   const [transactionId, setTransactionId] = useState("");
   const [selectedCity, setSelectedCity] = useState("Kolkata");
   const [selectedKarat, setSelectedKarat] = useState("24K");
+  const [productType, setProductType] = useState<"Investment" | "Jewelry">("Investment");
 
   // Live gold price data
   const [goldPriceData, setGoldPriceData] = useState<any>({
@@ -116,9 +117,40 @@ export default function PackagesPage() {
 
   // Derived: estimated grams for purchase amount (ex GST)
   const purchaseAmountNum = Number(activeTab === "Gold" ? goldPrice : landPrice);
-  const estimatedTaxable = purchaseAmountNum > 0 ? purchaseAmountNum / 1.18 : 0;
-  const estimatedGoldGrams = estimatedTaxable > 0 ? estimatedTaxable / currentGoldPricePerGram : 0;
-  const estimatedGST = purchaseAmountNum - estimatedTaxable;
+  
+  let estimatedTaxable = 0;
+  let estimatedGST = 0;
+  let estimatedGoldGrams = 0;
+
+  let baseGold = 0;
+  let makingCharges = 0;
+  let goldGST = 0;
+  let makingGST = 0;
+
+  if (purchaseAmountNum > 0) {
+    if (activeTab === "Gold") {
+      if (productType === "Investment") {
+        estimatedTaxable = purchaseAmountNum / 1.03;
+        estimatedGST = purchaseAmountNum - estimatedTaxable;
+        estimatedGoldGrams = estimatedTaxable / currentGoldPricePerGram;
+      } else {
+        // Jewelry: 3% on gold value + 18% on making charges (12% making charges rate)
+        // Total T = G * 1.1716
+        baseGold = purchaseAmountNum / 1.1716;
+        makingCharges = 0.12 * baseGold;
+        goldGST = 0.03 * baseGold;
+        makingGST = 0.18 * makingCharges;
+        
+        estimatedTaxable = baseGold + makingCharges;
+        estimatedGST = goldGST + makingGST;
+        estimatedGoldGrams = baseGold / currentGoldPricePerGram;
+      }
+    } else {
+      estimatedTaxable = purchaseAmountNum;
+      estimatedGST = 0;
+      estimatedGoldGrams = 0;
+    }
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -194,6 +226,7 @@ export default function PackagesPage() {
           goldPrice: currentGoldPricePerGram,
           karat: selectedKarat,
           city: selectedCity,
+          productType: activeTab === "Gold" ? productType : undefined,
         }),
       });
 
@@ -341,6 +374,37 @@ export default function PackagesPage() {
                 </div>
               )}
 
+              {/* Product Type selector (Gold only) */}
+              {activeTab === "Gold" && (
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 block uppercase tracking-wider mb-2">Gold Product Type</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setProductType("Investment")}
+                      className={`p-3 rounded-xl border text-xs font-bold transition-all ${
+                        productType === "Investment"
+                          ? "bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-200"
+                          : "bg-[#f8fafc] text-gray-700 border-gray-200 hover:bg-gray-150"
+                      }`}
+                    >
+                      Investment Gold (3% GST)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProductType("Jewelry")}
+                      className={`p-3 rounded-xl border text-xs font-bold transition-all ${
+                        productType === "Jewelry"
+                          ? "bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-200"
+                          : "bg-[#f8fafc] text-gray-700 border-gray-200 hover:bg-gray-150"
+                      }`}
+                    >
+                      Gold Jewelry (3% + 18% GST)
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Investment Input */}
               <div>
                 <label className="text-[10px] font-bold text-gray-400 block uppercase tracking-wider mb-2">
@@ -370,7 +434,9 @@ export default function PackagesPage() {
                       <p className="text-xs font-black text-gray-800 mt-0.5">₹{estimatedTaxable.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</p>
                     </div>
                     <div className="bg-white/70 rounded-xl p-2.5 text-center">
-                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wide">GST (18%)</p>
+                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wide">
+                        {productType === "Investment" ? "GST (3%)" : "GST (3% + 18%)"}
+                      </p>
                       <p className="text-xs font-black text-orange-600 mt-0.5">₹{estimatedGST.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</p>
                     </div>
                     <div className="bg-amber-500 rounded-xl p-2.5 text-center">
@@ -378,6 +444,27 @@ export default function PackagesPage() {
                       <p className="text-xs font-black text-white mt-0.5">~{estimatedGoldGrams.toFixed(3)}g</p>
                     </div>
                   </div>
+
+                  {productType === "Jewelry" && (
+                    <div className="mt-3 pt-3 border-t border-amber-200/50 text-[10px] text-amber-800/80 font-semibold space-y-1">
+                      <div className="flex justify-between">
+                        <span>Base Gold Value:</span>
+                        <span>₹{baseGold.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Gold GST (3%):</span>
+                        <span>₹{goldGST.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Making Charges (12%):</span>
+                        <span>₹{makingCharges.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Making GST (18%):</span>
+                        <span>₹{makingGST.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

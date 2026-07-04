@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { type, amount, screenshotUrl, transactionId, goldPrice, karat, city } = await request.json();
+    const { type, amount, screenshotUrl, transactionId, goldPrice, karat, city, productType } = await request.json();
     const numAmount = Number(amount);
 
     if (!type || !numAmount || !screenshotUrl || !transactionId) {
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     let monthlyReturnRate = 0;
     let redemptionLimit = 0;
     
-    // GST (18% on Gold jewelry/bullion)
+    // GST & dynamic gold values
     let taxableAmount = numAmount;
     let gstAmount = 0;
     let goldPriceVal = Number(goldPrice);
@@ -93,16 +93,27 @@ export async function POST(request: NextRequest) {
         monthlyReturnRate = 0.035; // 3.5%
       }
 
-      // GST calculations (18% GST inclusive)
-      taxableAmount = Number((numAmount / 1.18).toFixed(2));
-      gstAmount = Number((numAmount - taxableAmount).toFixed(2));
-
-      // Calculate weight based on active gold price
       if (!goldPriceVal || goldPriceVal <= 0) {
-        // Fallback gold price: ₹7,350/g
         goldPriceVal = 7350;
       }
-      goldWeight = Number((taxableAmount / goldPriceVal).toFixed(3));
+
+      const resolvedProductType = productType || "Investment";
+      if (resolvedProductType === "Investment") {
+        taxableAmount = Number((numAmount / 1.03).toFixed(2));
+        gstAmount = Number((numAmount - taxableAmount).toFixed(2));
+        goldWeight = Number((taxableAmount / goldPriceVal).toFixed(3));
+      } else {
+        // Jewelry: 3% on gold value + 18% on making charges (12% making charges rate)
+        // Total T = G * 1.1716
+        const baseGold = numAmount / 1.1716;
+        const makingCharges = 0.12 * baseGold;
+        const goldGST = 0.03 * baseGold;
+        const makingGST = 0.18 * makingCharges;
+
+        taxableAmount = Number((baseGold + makingCharges).toFixed(2));
+        gstAmount = Number((goldGST + makingGST).toFixed(2));
+        goldWeight = Number((baseGold / goldPriceVal).toFixed(3));
+      }
 
     } else if (type === "Land") {
       if (numAmount < 100000) {
@@ -134,6 +145,7 @@ export async function POST(request: NextRequest) {
       taxableAmount: type === "Gold" ? taxableAmount : undefined,
       karat: type === "Gold" ? (karat || "24K") : undefined,
       city: type === "Gold" ? (city || "Kolkata") : undefined,
+      productType: type === "Gold" ? (productType || "Investment") : undefined,
     });
 
     return NextResponse.json({

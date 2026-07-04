@@ -18,6 +18,7 @@ export interface IPurchase extends Document {
   taxableAmount?: number;
   karat?: string;
   city?: string;
+  productType?: "Investment" | "Jewelry" | null;
   createdAt: Date;
 }
 
@@ -40,6 +41,7 @@ const PurchaseSchema = new Schema<IPurchase>(
     taxableAmount: { type: Number, default: null },
     karat: { type: String, default: null },
     city: { type: String, default: null },
+    productType: { type: String, enum: ["Investment", "Jewelry"], default: null },
   },
   {
     timestamps: true,
