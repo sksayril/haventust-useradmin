@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { connectDB } from "@/lib/mongodb";
+import SystemSetting from "@/models/SystemSetting";
 
 /**
  * GET /api/gold-price
@@ -6,12 +8,10 @@ import { NextResponse } from "next/server";
  * Returns live gold spot prices (per gram, in INR) for 24K, 22K, 21K, 20K, 18K
  * across 4 Indian cities (Kolkata, Mumbai, Delhi, Chennai).
  *
- * Data Source: GoldAPI.io  →  https://www.goldapi.io/api/XAU/INR
- *   • Uses `price_gram_24k`, `price_gram_22k` etc. fields from the response
- *     (already expressed in grams, no troy-ounce conversion needed)
- *   • API key: GOLD_API_KEY in .env.local
- *   • Cache: 5 min (avoids burning the free-tier 100 calls/day limit)
- *   • Fallback: realistic MCX-style simulation when no key is present
+ * Data Source: Scraped from GoodReturns (https://www.goodreturns.in/gold-rates/kolkata.html)
+ *   • Cache: 5 min (avoids excessive requests)
+ *   • Fallback: realistic MCX-style simulation
+ *   • Admin override support daily.
  */
 
 // Indian city price spreads vs Kolkata base (in ₹/gram)
@@ -40,10 +40,13 @@ type PriceMap = Record<string, Record<string, number>>; // city → karat → �
 function buildPayload(
   gram24k: number,
   gram22k: number,
+  gram18k: number,
   isLive: boolean,
+  isOverride = false,
   rawResponse?: any
 ): {
   isLive: boolean;
+  isOverride: boolean;
   source: string;
   rawRate?: any;
   prices: PriceMap;
@@ -57,13 +60,21 @@ function buildPayload(
       "22K": Math.round(gram22k + spread * (22 / 24)),
       "21K": Math.round(gram24k * KARAT_FACTOR["21K"] + spread * (21 / 24)),
       "20K": Math.round(gram24k * KARAT_FACTOR["20K"] + spread * (20 / 24)),
-      "18K": Math.round(gram24k * KARAT_FACTOR["18K"] + spread * (18 / 24)),
+      "18K": Math.round(gram18k + spread * (18 / 24)),
     };
+  }
+
+  let sourceStr = "Simulated fallback (MCX-style)";
+  if (isOverride) {
+    sourceStr = "Admin Custom Price";
+  } else if (isLive) {
+    sourceStr = "GoodReturns (scraped live)";
   }
 
   return {
     isLive,
-    source: isLive ? "GoldAPI.io (live XAU/INR)" : "Simulated fallback (MCX-style)",
+    isOverride,
+    source: sourceStr,
     rawRate: rawResponse ?? undefined,
     prices,
     timestamp: new Date().toISOString(),
@@ -76,64 +87,150 @@ function simulatedPrices() {
   const fluc = Math.sin(seed / 60) * 18;
   const gram24k = Math.round(7350 + fluc);
   const gram22k = Math.round(gram24k * (22 / 24));
-  return buildPayload(gram24k, gram22k, false);
+  const gram18k = Math.round(gram24k * (18 / 24));
+  return buildPayload(gram24k, gram22k, gram18k, false);
 }
 
-async function fetchFromGoldAPI() {
-  const apiKey = process.env.GOLD_API_KEY?.trim();
-  if (!apiKey) return null;
-
+async function fetchFromGoodReturns() {
   // Serve from cache if still fresh
   if (cache && Date.now() - cache.ts < CACHE_TTL) {
     return cache.payload;
   }
 
   try {
-    const res = await fetch("https://www.goldapi.io/api/XAU/INR", {
+    const res = await fetch("https://www.goodreturns.in/gold-rates/kolkata.html", {
       headers: {
-        "x-access-token": apiKey,
-        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
-      // Next.js fetch cache (server-side), revalidates every 5 min
       next: { revalidate: 300 },
     });
 
     if (!res.ok) {
-      console.error(`[gold-price] GoldAPI responded ${res.status}`);
+      console.error(`[gold-price] GoodReturns responded ${res.status}`);
       return null;
     }
 
-    const data = await res.json();
+    const html = await res.text();
 
-    // GoldAPI returns `price_gram_24k` and `price_gram_22k` in the requested currency (INR)
-    const gram24k: number = data.price_gram_24k;
-    const gram22k: number = data.price_gram_22k;
+    const regex24 = /id=["']24K-price["'][^>]*>(?:&#x20b9;|₹)?\s*([\d,]+)/i;
+    const regex22 = /id=["']22K-price["'][^>]*>(?:&#x20b9;|₹)?\s*([\d,]+)/i;
+    const regex18 = /id=["']18K-price["'][^>]*>(?:&#x20b9;|₹)?\s*([\d,]+)/i;
 
-    if (!gram24k || !gram22k) return null;
+    const m24 = html.match(regex24);
+    const m22 = html.match(regex22);
+    const m18 = html.match(regex18);
 
-    const payload = buildPayload(gram24k, gram22k, true, {
-      price_gram_24k: gram24k,
-      price_gram_22k: gram22k,
-      price_per_oz: data.price,
-      ch: data.ch,
-      chp: data.chp,
-      high: data.high_price,
-      low: data.low_price,
+    if (!m24 || !m22 || !m18) {
+      console.error("[gold-price] Scraping failed to find all prices on GoodReturns page");
+      return null;
+    }
+
+    const gram24k = parseFloat(m24[1].replace(/,/g, ""));
+    const gram22k = parseFloat(m22[1].replace(/,/g, ""));
+    const gram18k = parseFloat(m18[1].replace(/,/g, ""));
+
+    if (isNaN(gram24k) || isNaN(gram22k) || isNaN(gram18k)) {
+      console.error("[gold-price] Scraped price parses to NaN");
+      return null;
+    }
+
+    const payload = buildPayload(gram24k, gram22k, gram18k, true, false, {
+      scraped_24k: gram24k,
+      scraped_22k: gram22k,
+      scraped_18k: gram18k,
     });
 
     // Update server-side cache
     cache = { payload, ts: Date.now() };
     return payload;
   } catch (err) {
-    console.error("[gold-price] Fetch failed:", err);
+    console.error("[gold-price] GoodReturns scrape failed:", err);
     return null;
   }
+}
+
+/**
+ * Resolves the current gold price for a specific city and karat on the server side.
+ * Safely handles admin overrides, live scraping, and simulation fallbacks.
+ */
+export async function getGoldPriceFor(city: string, karat: string): Promise<number> {
+  try {
+    await connectDB();
+    const settings = await SystemSetting.find({});
+    const config: Record<string, string> = {};
+    settings.forEach((s) => {
+      config[s.key] = s.value;
+    });
+
+    if (config.enableGoldPriceOverride === "true" && config.manualGoldPrice22K) {
+      const override22k = parseFloat(config.manualGoldPrice22K);
+      if (!isNaN(override22k) && override22k > 0) {
+        const override24k = Math.round(override22k * 24 / 22);
+        const override18k = Math.round(override22k * 18 / 22);
+
+        const spread = CITY_SPREAD[city] ?? 0;
+        const prices: Record<string, number> = {
+          "24K": Math.round(override24k + spread),
+          "22K": Math.round(override22k + spread * (22 / 24)),
+          "21K": Math.round(override24k * KARAT_FACTOR["21K"] + spread * (21 / 24)),
+          "20K": Math.round(override24k * KARAT_FACTOR["20K"] + spread * (20 / 24)),
+          "18K": Math.round(override18k + spread * (18 / 24)),
+        };
+
+        return prices[karat] ?? prices["24K"] ?? 7350;
+      }
+    }
+  } catch (err) {
+    console.error("[getGoldPriceFor] DB error reading settings, falling back to live/sim:", err);
+  }
+
+  // Fallback to live scrape
+  const liveData = await fetchFromGoodReturns();
+  if (liveData) {
+    const cityPrices = liveData.prices[city] ?? liveData.prices["Kolkata"];
+    return cityPrices[karat] ?? cityPrices["24K"] ?? 7350;
+  }
+
+  // Fallback to simulation
+  const sim = simulatedPrices();
+  const cityPrices = sim.prices[city] ?? sim.prices["Kolkata"];
+  return cityPrices[karat] ?? cityPrices["24K"] ?? 7350;
 }
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const result = (await fetchFromGoldAPI()) ?? simulatedPrices();
+  try {
+    await connectDB();
+    const settings = await SystemSetting.find({});
+    const config: Record<string, string> = {};
+    settings.forEach((s) => {
+      config[s.key] = s.value;
+    });
+
+    if (config.enableGoldPriceOverride === "true" && config.manualGoldPrice22K) {
+      const override22k = parseFloat(config.manualGoldPrice22K);
+      if (!isNaN(override22k) && override22k > 0) {
+        const override24k = Math.round(override22k * 24 / 22);
+        const override18k = Math.round(override22k * 18 / 22);
+
+        const payload = buildPayload(override24k, override22k, override18k, true, true, {
+          manual_override: true,
+          scraped_22k: override22k,
+        });
+
+        return NextResponse.json({ success: true, ...payload }, {
+          headers: {
+            "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
+          },
+        });
+      }
+    }
+  } catch (err) {
+    console.error("[GET /api/gold-price] Error reading settings override:", err);
+  }
+
+  const result = (await fetchFromGoodReturns()) ?? simulatedPrices();
 
   return NextResponse.json({ success: true, ...result }, {
     headers: {

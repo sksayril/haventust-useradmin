@@ -116,7 +116,7 @@ export default function PackagesPage() {
 
   // Derived: estimated grams for purchase amount (ex GST)
   const purchaseAmountNum = Number(activeTab === "Gold" ? goldPrice : landPrice);
-  const estimatedTaxable = purchaseAmountNum > 0 ? purchaseAmountNum / 1.03 : 0;
+  const estimatedTaxable = purchaseAmountNum > 0 ? purchaseAmountNum / 1.18 : 0;
   const estimatedGoldGrams = estimatedTaxable > 0 ? estimatedTaxable / currentGoldPricePerGram : 0;
   const estimatedGST = purchaseAmountNum - estimatedTaxable;
 
@@ -306,7 +306,7 @@ export default function PackagesPage() {
                     </div>
                   </div>
                   <span className={`text-[9px] font-black px-2 py-1 rounded-full border ${isLiveGold ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-amber-100 text-amber-600 border-amber-200"}`}>
-                    {isLiveGold ? "● GoldAPI Live" : "Simulated"}
+                    {isLiveGold ? "● GoodReturns Live" : "Simulated"}
                   </span>
                 </div>
               )}
@@ -370,7 +370,7 @@ export default function PackagesPage() {
                       <p className="text-xs font-black text-gray-800 mt-0.5">₹{estimatedTaxable.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</p>
                     </div>
                     <div className="bg-white/70 rounded-xl p-2.5 text-center">
-                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wide">GST (3%)</p>
+                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wide">GST (18%)</p>
                       <p className="text-xs font-black text-orange-600 mt-0.5">₹{estimatedGST.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</p>
                     </div>
                     <div className="bg-amber-500 rounded-xl p-2.5 text-center">

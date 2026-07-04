@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 import Purchase from "@/models/Purchase";
+import { getGoldPriceFor } from "../gold-price/route";
 
 interface JWTPayload {
   userId: string;
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
     let monthlyReturnRate = 0;
     let redemptionLimit = 0;
     
-    // GST (3% on Gold jewelry/bullion)
+    // GST (18% on Gold jewelry/bullion)
     let taxableAmount = numAmount;
     let gstAmount = 0;
     let goldPriceVal = Number(goldPrice);
@@ -76,6 +77,13 @@ export async function POST(request: NextRequest) {
       if (numAmount < 10000) {
         return NextResponse.json({ error: "Gold packages start at ₹10,000 onwards." }, { status: 400 });
       }
+
+      // Securely fetch official rate on the server side (override or scraped)
+      const officialRate = await getGoldPriceFor(city || "Kolkata", karat || "22K");
+      if (officialRate && officialRate > 0) {
+        goldPriceVal = officialRate;
+      }
+
       redemptionLimit = 0.60;
       if (numAmount < 500000) {
         monthlyReturnRate = 0.025; // 2.5%
@@ -85,8 +93,8 @@ export async function POST(request: NextRequest) {
         monthlyReturnRate = 0.035; // 3.5%
       }
 
-      // GST calculations (3% GST inclusive)
-      taxableAmount = Number((numAmount / 1.03).toFixed(2));
+      // GST calculations (18% GST inclusive)
+      taxableAmount = Number((numAmount / 1.18).toFixed(2));
       gstAmount = Number((numAmount - taxableAmount).toFixed(2));
 
       // Calculate weight based on active gold price

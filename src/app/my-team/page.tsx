@@ -477,7 +477,7 @@ export default function MyTeamPage() {
                         {/* Dynamic User Avatar / Silhouette */}
                         <div className="relative w-8 h-8 rounded-full overflow-hidden">
                           {isRoot ? (
-                            <Image src="/avatar.png" alt={node.name} fill className="object-cover" />
+                            <Image src="/avatar.png" alt={node.name} fill sizes="32px" className="object-cover" />
                           ) : (
                             <div className={`w-full h-full flex items-center justify-center font-bold text-[10px] ${
                               isSelected ? "text-white" : isDirect ? "text-blue-600 bg-blue-50" : "text-gray-500 bg-gray-50"

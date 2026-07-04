@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
     const { name, email, phone, password, referralCode: referredByCode } = body;
 
     // ── Validation ─────────────────────────────────────────────────────────────
-    if (!name || !email || !phone || !password) {
+    if (!name || !email || !phone || !password || !referredByCode) {
       return NextResponse.json(
-        { error: "Name, email, phone and password are required." },
+        { error: "Name, email, phone, password and referral code are required." },
         { status: 400 }
       );
     }
@@ -38,15 +38,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if referral code exists (if provided)
-    if (referredByCode) {
-      const referrer = await User.findOne({ referralCode: referredByCode.toUpperCase() });
-      if (!referrer) {
-        return NextResponse.json(
-          { error: "Invalid referral code." },
-          { status: 400 }
-        );
-      }
+    // Check if referral code exists
+    const referrer = await User.findOne({ referralCode: referredByCode.toUpperCase() });
+    if (!referrer) {
+      return NextResponse.json(
+        { error: "Invalid referral code." },
+        { status: 400 }
+      );
     }
 
     // Check duplicate email

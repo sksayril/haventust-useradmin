@@ -244,12 +244,12 @@ export default function AdminLoginPage() {
 
           {/* Footer links */}
           <div className="flex flex-col items-center gap-3 mt-8">
-            <p className="text-xs font-semibold text-gray-500">
+            {/* <p className="text-xs font-semibold text-gray-500">
               Need admin access?{" "}
               <Link href="/admin/signup" className="text-[#0b5be6] font-bold hover:underline">
                 Create Admin Profile
               </Link>
-            </p>
+            </p> */}
             <div className="w-full h-px bg-gray-100" />
             <p className="text-[10px] text-gray-400 font-bold">
               Not an admin?{" "}

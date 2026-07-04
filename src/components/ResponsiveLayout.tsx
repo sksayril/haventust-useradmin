@@ -197,6 +197,7 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
                       src="/avatar.png"
                       alt="User Avatar"
                       fill
+                      sizes="40px"
                       className="object-cover"
                     />
                   )}
@@ -298,6 +299,7 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
                   src="/avatar.png"
                   alt="User Avatar"
                   fill
+                  sizes="40px"
                   className="object-cover"
                 />
               )}

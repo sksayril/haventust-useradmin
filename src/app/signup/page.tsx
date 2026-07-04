@@ -163,6 +163,10 @@ function SignupForm() {
       showToast("Password must be at least 8 characters.", "error");
       return;
     }
+    if (!referralCode.trim()) {
+      showToast("Referral code is required.", "error");
+      return;
+    }
 
     setIsLoading(true);
 
@@ -176,7 +180,7 @@ function SignupForm() {
           email,
           phone,
           password,
-          referralCode: referralCode.trim().toUpperCase() || undefined,
+          referralCode: referralCode.trim().toUpperCase(),
         }),
       });
 
@@ -364,8 +368,7 @@ function SignupForm() {
         {/* Referral Code */}
         <div>
           <label className="text-xs font-bold text-gray-700 block mb-1.5">
-            Referral Code{" "}
-            <span className="text-gray-400 font-medium">(Optional)</span>
+            Referral Code <span className="text-red-500 font-bold">*</span>
           </label>
           <div className="relative">
             <input

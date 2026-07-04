@@ -138,23 +138,25 @@ export default function Sidebar({ onClose }: SidebarProps) {
       </div>
 
       {/* Upgrade to Pro Card */}
-      <div className="px-4 mt-6">
-        <div className="bg-gradient-to-br from-[#1d6bf3] to-[#0433a5] border border-blue-400/20 rounded-2xl p-4 shadow-lg relative overflow-hidden">
-          <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-white/5 rounded-full blur-xl" />
-          <div className="flex items-start justify-between mb-3">
-            <div className="bg-yellow-400/20 p-2 rounded-lg">
-              <Crown className="w-6 h-6 text-yellow-400 fill-yellow-400/20" />
+      {isPending && (
+        <div className="px-4 mt-6">
+          <div className="bg-gradient-to-br from-[#1d6bf3] to-[#0433a5] border border-blue-400/20 rounded-2xl p-4 shadow-lg relative overflow-hidden">
+            <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-white/5 rounded-full blur-xl" />
+            <div className="flex items-start justify-between mb-3">
+              <div className="bg-yellow-400/20 p-2 rounded-lg">
+                <Crown className="w-6 h-6 text-yellow-400 fill-yellow-400/20" />
+              </div>
             </div>
+            <h3 className="text-sm font-bold text-white mb-1">Upgrade to Pro Plan</h3>
+            <p className="text-xs text-blue-200 mb-4 leading-relaxed">
+              Unlock more benefits and higher earnings
+            </p>
+            <button className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-orange-500/20">
+              Upgrade Now
+            </button>
           </div>
-          <h3 className="text-sm font-bold text-white mb-1">Upgrade to Pro Plan</h3>
-          <p className="text-xs text-blue-200 mb-4 leading-relaxed">
-            Unlock more benefits and higher earnings
-          </p>
-          <button className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-orange-500/20">
-            Upgrade Now
-          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }

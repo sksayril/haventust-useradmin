@@ -21,6 +21,8 @@ export async function GET() {
       commissionLevel2to5: "0.20",
       commissionLevel6to10: "0.15",
       commissionLevel11to20: "0.10",
+      manualGoldPrice22K: "",
+      enableGoldPriceOverride: "false",
     };
 
     settings.forEach((s) => {
@@ -60,6 +62,8 @@ export async function POST(request: NextRequest) {
     await upsertKey("commissionLevel2to5", body.commissionLevel2to5);
     await upsertKey("commissionLevel6to10", body.commissionLevel6to10);
     await upsertKey("commissionLevel11to20", body.commissionLevel11to20);
+    await upsertKey("manualGoldPrice22K", body.manualGoldPrice22K);
+    await upsertKey("enableGoldPriceOverride", body.enableGoldPriceOverride);
 
     return NextResponse.json({ message: "Settings updated successfully" });
   } catch (error) {

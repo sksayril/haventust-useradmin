@@ -476,65 +476,6 @@ export default function UserDashboardPage() {
         {/* Left Column (2/3 width on xl) */}
         <div className="xl:col-span-2 flex flex-col gap-6">
 
-          {/* Live Gold Price Ticker Card */}
-          <div className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-28 h-28 bg-amber-50 rounded-full blur-2xl" />
-            <div className="flex items-center justify-between mb-4 relative z-10">
-              <div className="flex items-center gap-2.5">
-                <div className={`p-2 bg-gradient-to-br from-amber-400 to-yellow-500 text-white rounded-xl shadow-md shadow-amber-200 ${isLiveGold ? "animate-pulse" : ""}`}>
-                  <Coins className="w-4 h-4" />
-                </div>
-                <div className="text-left">
-                  <h3 className="text-xs font-black text-gray-900 uppercase tracking-wide">Gold Spot Price &bull; India</h3>
-                  <p className="text-[9px] text-gray-400 font-semibold">Per gram &bull; 24K &amp; 22K &bull; Updated every 5 min</p>
-                </div>
-              </div>
-              <span className={`text-[9px] font-black px-2.5 py-1 rounded-full border uppercase ${isLiveGold
-                  ? "bg-emerald-50 text-emerald-600 border-emerald-200 animate-pulse"
-                  : "bg-amber-50 text-amber-600 border-amber-100"
-                }`}>
-                {isLiveGold ? "● GoldAPI Live" : "Simulated"}
-              </span>
-            </div>
-
-            {/* City ticker grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 relative z-10 text-left">
-              {["Kolkata", "Mumbai", "Delhi", "Chennai"].map((city, idx) => {
-                const cityPrices = goldPrices[city] ?? {};
-                const price24K: number = cityPrices["24K"] ?? 7350;
-                const price22K: number = cityPrices["22K"] ?? 6740;
-                const isActive = idx === activeCityIndex;
-
-                return (
-                  <div
-                    key={city}
-                    className={`border rounded-2xl p-3 transition-all duration-500 cursor-pointer ${isActive
-                        ? "bg-gradient-to-br from-amber-50 to-yellow-50/60 border-amber-300 shadow-md shadow-amber-100 scale-[1.02]"
-                        : "bg-slate-50/50 border-gray-100 opacity-55 hover:opacity-80"
-                      }`}
-                    onClick={() => setActiveCityIndex(idx)}
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-black text-gray-700 uppercase tracking-wider">{city}</span>
-                      {isActive && <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping" />}
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[9px] text-gray-400 font-bold">24K /g</span>
-                        <span className="text-[11px] text-amber-700 font-black">₹{price24K.toLocaleString("en-IN")}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[9px] text-gray-400 font-bold">22K /g</span>
-                        <span className="text-[10px] text-gray-700 font-bold">₹{price22K.toLocaleString("en-IN")}</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-
           {/* ─ Wallet Hero Card ─────────────────────────────────────────── */}
           <div className="bg-gradient-to-br from-[#0a56e3] via-[#073ca3] to-[#041a4a] rounded-3xl p-6 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />

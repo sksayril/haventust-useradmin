@@ -27,6 +27,7 @@ import {
   Eye,
   ArrowDownCircle,
   ArrowUpCircle,
+  Coins,
 } from "lucide-react";
 
 const ADMIN_SECRET = "haventust_admin_internal_secret_2026";
@@ -150,6 +151,27 @@ export default function AdminDashboard() {
   const [depositHistoryPage, setDepositHistoryPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
+  // Gold price states
+  const [goldPrices, setGoldPrices] = useState<any>({});
+  const [isLiveGold, setIsLiveGold] = useState(false);
+  const [activeCityIndex, setActiveCityIndex] = useState(0);
+  const [manualGoldPrice22K, setManualGoldPrice22K] = useState("");
+  const [enableGoldPriceOverride, setEnableGoldPriceOverride] = useState(false);
+  const [isSavingGoldSettings, setIsSavingGoldSettings] = useState(false);
+
+  const fetchGoldPrices = useCallback(async () => {
+    try {
+      const res = await fetch("/api/gold-price");
+      const data = await res.json();
+      if (data.success && data.prices) {
+        setGoldPrices(data.prices);
+        setIsLiveGold(!!data.isLive);
+      }
+    } catch (err) {
+      console.error("Failed to fetch gold prices:", err);
+    }
+  }, []);
+
   // Toast
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const showToast = useCallback((message: string, type: "success" | "error") => setToast({ message, type }), []);
@@ -247,11 +269,40 @@ export default function AdminDashboard() {
         if (data.commissionLevel2to5) setCommissionLevel2to5(data.commissionLevel2to5);
         if (data.commissionLevel6to10) setCommissionLevel6to10(data.commissionLevel6to10);
         if (data.commissionLevel11to20) setCommissionLevel11to20(data.commissionLevel11to20);
+        if (data.manualGoldPrice22K !== undefined) setManualGoldPrice22K(data.manualGoldPrice22K);
+        if (data.enableGoldPriceOverride !== undefined) setEnableGoldPriceOverride(data.enableGoldPriceOverride === "true");
       }
     } catch {
       // settings fetch failed silently
     }
-  }, []);
+  }, [fetchGoldPrices]);
+
+  const saveGoldSettings = async () => {
+    setIsSavingGoldSettings(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-secret": ADMIN_SECRET,
+        },
+        body: JSON.stringify({
+          manualGoldPrice22K: manualGoldPrice22K.trim(),
+          enableGoldPriceOverride: String(enableGoldPriceOverride),
+        }),
+      });
+      if (res.ok) {
+        showToast("Gold price settings updated successfully!", "success");
+        fetchGoldPrices();
+      } else {
+        showToast("Failed to update gold price settings.", "error");
+      }
+    } catch {
+      showToast("Network error updating gold price settings.", "error");
+    } finally {
+      setIsSavingGoldSettings(false);
+    }
+  };
 
   const saveCommissionRates = async () => {
     setIsSavingCommissions(true);
@@ -384,8 +435,9 @@ export default function AdminDashboard() {
       fetchStats();
       fetchUsers();
       fetchSettings();
+      fetchGoldPrices();
     }
-  }, [isAdminAuthenticated, fetchStats, fetchUsers, fetchSettings]);
+  }, [isAdminAuthenticated, fetchStats, fetchUsers, fetchSettings, fetchGoldPrices]);
 
   /* ── Actions ────────────────────────────────────────────────────────────── */
   const handleLogout = () => {
@@ -779,6 +831,64 @@ export default function AdminDashboard() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Live Gold Pricing Section */}
+            <div className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm overflow-hidden relative text-left">
+              <div className="absolute top-0 right-0 w-28 h-28 bg-amber-50 rounded-full blur-2xl pointer-events-none" />
+              <div className="flex items-center justify-between mb-4 relative z-10">
+                <div className="flex items-center gap-2.5">
+                  <div className={`p-2 bg-gradient-to-br from-amber-400 to-yellow-500 text-white rounded-xl shadow-md shadow-amber-200 ${isLiveGold ? "animate-pulse" : ""}`}>
+                    <Coins className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-black text-gray-900 uppercase tracking-wide">Live Gold Spot Price &bull; India</h3>
+                    <p className="text-[9px] text-gray-400 font-semibold">Per gram &bull; 24K &amp; 22K &bull; Scraped from GoodReturns</p>
+                  </div>
+                </div>
+                <span className={`text-[9px] font-black px-2.5 py-1 rounded-full border uppercase ${isLiveGold
+                    ? "bg-emerald-50 text-emerald-600 border-emerald-200 animate-pulse"
+                    : "bg-amber-50 text-amber-600 border-amber-100"
+                  }`}>
+                  {isLiveGold ? "● GoodReturns Live" : "Simulated"}
+                </span>
+              </div>
+
+              {/* City ticker grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 relative z-10">
+                {["Kolkata", "Mumbai", "Delhi", "Chennai"].map((city, idx) => {
+                  const cityPrices = goldPrices[city] ?? {};
+                  const price24K: number = cityPrices["24K"] ?? 7350;
+                  const price22K: number = cityPrices["22K"] ?? 6740;
+                  const isActive = idx === activeCityIndex;
+
+                  return (
+                    <div
+                      key={city}
+                      className={`border rounded-2xl p-3 transition-all duration-500 cursor-pointer ${isActive
+                          ? "bg-gradient-to-br from-amber-50 to-yellow-50/60 border-amber-300 shadow-md shadow-amber-100 scale-[1.02]"
+                          : "bg-slate-50/50 border-gray-100 opacity-55 hover:opacity-80"
+                        }`}
+                      onClick={() => setActiveCityIndex(idx)}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[10px] font-black text-gray-700 uppercase tracking-wider">{city}</span>
+                        {isActive && <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping" />}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[9px] text-gray-400 font-bold">24K /g</span>
+                          <span className="text-[11px] text-amber-700 font-black">₹{price24K.toLocaleString("en-IN")}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[9px] text-gray-400 font-bold">22K /g</span>
+                          <span className="text-[10px] text-gray-700 font-bold">₹{price22K.toLocaleString("en-IN")}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Investment Volume & Allocation Chart Section */}
@@ -2097,6 +2207,62 @@ export default function AdminDashboard() {
             <p className="text-[10px] text-gray-400 font-medium text-center">
               Changes take effect on the next payout cycle run. Need 7 directs to unlock all levels.
             </p>
+
+            {/* Live Gold Price Override Settings */}
+            <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center justify-between border-b border-gray-50 pb-4 mb-5">
+                <div>
+                  <h3 className="text-sm font-extrabold text-gray-900">Custom 22K Gold Price Settings</h3>
+                  <p className="text-[10px] text-gray-400 font-medium mt-0.5">Set a custom manual rate for 22K Gold that overrides auto-scraping</p>
+                </div>
+                <span className="bg-amber-50 text-amber-600 text-[9px] font-black px-2.5 py-1 rounded-full border border-amber-100 uppercase tracking-wider">Live Controls</span>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="enableGoldOverride"
+                    checked={enableGoldPriceOverride}
+                    onChange={(e) => setEnableGoldPriceOverride(e.target.checked)}
+                    className="w-4 h-4 text-[#0b5be6] border-gray-300 rounded focus:ring-[#0b5be6] cursor-pointer"
+                  />
+                  <label htmlFor="enableGoldOverride" className="text-xs font-bold text-gray-700 cursor-pointer select-none">
+                    Enable Custom 22K Gold Price Override
+                  </label>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-gray-800">
+                    Custom 22K Gold Price (₹ per gram)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      step="1"
+                      min="0"
+                      disabled={!enableGoldPriceOverride}
+                      value={manualGoldPrice22K}
+                      onChange={(e) => setManualGoldPrice22K(e.target.value)}
+                      placeholder="e.g. 7200"
+                      className="flex-1 bg-white disabled:bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#0b5be6]/20 focus:border-[#0b5be6]"
+                    />
+                    <span className="text-xs font-black text-gray-500 shrink-0">₹/g</span>
+                  </div>
+                  <p className="text-[10px] text-gray-400 font-medium">
+                    When enabled, the 24K and 18K prices will be automatically calculated based on this 22K rate.
+                  </p>
+                </div>
+
+                <button
+                  onClick={saveGoldSettings}
+                  disabled={isSavingGoldSettings}
+                  className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-black py-3.5 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10 hover:from-amber-600 hover:to-yellow-600 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSavingGoldSettings ? "Saving..." : "Save Gold Settings"}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
