@@ -103,12 +103,12 @@ export async function POST(request: NextRequest) {
         gstAmount = Number((numAmount - taxableAmount).toFixed(2));
         goldWeight = Number((taxableAmount / goldPriceVal).toFixed(3));
       } else {
-        // Jewelry: 3% on gold value + 18% on making charges (12% making charges rate)
-        // Total T = G * 1.1716
-        const baseGold = numAmount / 1.1716;
+        // Jewelry: 3% on gold value + 3% on making charges (12% making charges rate)
+        // Total T = G * 1.1536
+        const baseGold = numAmount / 1.1536;
         const makingCharges = 0.12 * baseGold;
         const goldGST = 0.03 * baseGold;
-        const makingGST = 0.18 * makingCharges;
+        const makingGST = 0.03 * makingCharges;
 
         taxableAmount = Number((baseGold + makingCharges).toFixed(2));
         gstAmount = Number((goldGST + makingGST).toFixed(2));

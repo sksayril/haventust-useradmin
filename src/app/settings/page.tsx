@@ -128,7 +128,7 @@ export default function ProfileSettingsPage() {
     if (!printWindow) return;
 
     const rate = pkg.goldPriceAtPurchase || 7350;
-    const taxable = pkg.taxableAmount || Number((pkg.amount / 1.18).toFixed(2));
+    const taxable = pkg.taxableAmount || Number((pkg.amount / 1.03).toFixed(2));
     const gst = pkg.gstAmount || Number((pkg.amount - taxable).toFixed(2));
     const weight = pkg.goldWeightGrams || Number((taxable / rate).toFixed(3));
     const karat = pkg.karat || "24K";
@@ -678,7 +678,7 @@ export default function ProfileSettingsPage() {
                       year: "numeric",
                     });
                     const rate = pkg.goldPriceAtPurchase || 7350;
-                    const weight = pkg.goldWeightGrams || ((pkg.amount / 1.18) / rate);
+                    const weight = pkg.goldWeightGrams || ((pkg.amount / 1.03) / rate);
 
                     return (
                       <div

@@ -134,12 +134,12 @@ export default function PackagesPage() {
         estimatedGST = purchaseAmountNum - estimatedTaxable;
         estimatedGoldGrams = estimatedTaxable / currentGoldPricePerGram;
       } else {
-        // Jewelry: 3% on gold value + 18% on making charges (12% making charges rate)
-        // Total T = G * 1.1716
-        baseGold = purchaseAmountNum / 1.1716;
+        // Jewelry: 3% on gold value + 3% on making charges (12% making charges rate)
+        // Total T = G * 1.1536
+        baseGold = purchaseAmountNum / 1.1536;
         makingCharges = 0.12 * baseGold;
         goldGST = 0.03 * baseGold;
-        makingGST = 0.18 * makingCharges;
+        makingGST = 0.03 * makingCharges;
         
         estimatedTaxable = baseGold + makingCharges;
         estimatedGST = goldGST + makingGST;
@@ -399,7 +399,7 @@ export default function PackagesPage() {
                           : "bg-[#f8fafc] text-gray-700 border-gray-200 hover:bg-gray-150"
                       }`}
                     >
-                      Gold Jewelry (3% + 18% GST)
+                      Gold Jewelry (3% GST)
                     </button>
                   </div>
                 </div>
@@ -435,7 +435,7 @@ export default function PackagesPage() {
                     </div>
                     <div className="bg-white/70 rounded-xl p-2.5 text-center">
                       <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wide">
-                        {productType === "Investment" ? "GST (3%)" : "GST (3% + 18%)"}
+                        GST (3%)
                       </p>
                       <p className="text-xs font-black text-orange-600 mt-0.5">₹{estimatedGST.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</p>
                     </div>
@@ -460,7 +460,7 @@ export default function PackagesPage() {
                         <span>₹{makingCharges.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Making GST (18%):</span>
+                        <span>Making GST (3%):</span>
                         <span>₹{makingGST.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</span>
                       </div>
                     </div>
