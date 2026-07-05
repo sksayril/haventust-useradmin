@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
-import { Bell, Search, ChevronDown, Menu, X, Calendar as CalendarIcon } from "lucide-react";
+import { Bell, Search, ChevronDown, Menu, X, Calendar as CalendarIcon, Lock, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import ActivationPage from "./ActivationPage";
@@ -27,6 +27,72 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
 
   const isAdminRoute = pathname.startsWith("/admin");
   const isAuthRoute = pathname === "/login" || pathname === "/signup";
+
+  const [showSessionExpired, setShowSessionExpired] = useState(false);
+
+  const handleForceLogout = useCallback(() => {
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("adminAuthenticated");
+    localStorage.removeItem("adminEmail");
+    localStorage.removeItem("adminName");
+    setShowSessionExpired(false);
+    window.location.href = "/login";
+  }, []);
+
+  // 1. Intercept fetch response errors globally (401 Unauthorized)
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    
+    window.fetch = async (...args) => {
+      const response = await originalFetch(...args);
+      
+      if (response.status === 401) {
+        const urlStr = typeof args[0] === "string" ? args[0] : (args[0] instanceof URL ? args[0].href : "");
+        const isAuthRequest = urlStr.includes("/api/auth/login") || urlStr.includes("/api/auth/signup");
+        const isAuthPageRoute = window.location.pathname === "/login" || window.location.pathname === "/signup" || window.location.pathname === "/admin/login" || window.location.pathname === "/admin/signup";
+        
+        if (!isAuthRequest && !isAuthPageRoute) {
+          setShowSessionExpired(true);
+        }
+      }
+      return response;
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
+
+  // 2. Proactive client-side JWT expiration check
+  useEffect(() => {
+    if (isAuthRoute || isAdminRoute) return;
+
+    const checkTokenExpiry = () => {
+      const token = localStorage.getItem("authToken");
+      if (token) {
+        try {
+          const payloadBase64 = token.split(".")[1];
+          if (payloadBase64) {
+            const decodedPayload = JSON.parse(window.atob(payloadBase64));
+            if (typeof decodedPayload.exp === "number") {
+              const expiryTime = decodedPayload.exp * 1000;
+              if (Date.now() >= expiryTime) {
+                setShowSessionExpired(true);
+              }
+            }
+          }
+        } catch (e) {
+          setShowSessionExpired(true);
+        }
+      }
+    };
+
+    checkTokenExpiry();
+    const interval = setInterval(checkTokenExpiry, 15000); // check every 15 seconds
+    return () => clearInterval(interval);
+  }, [isAuthRoute, isAdminRoute]);
 
   useEffect(() => {
     if (isAdminRoute) return;
@@ -76,6 +142,14 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
   }, [isAuthenticated, fetchUserProfile]);
 
   if (isAdminRoute) {
+    const isAdminAuth = pathname === "/admin/login" || pathname === "/admin/signup";
+    if (isAdminAuth) {
+      return (
+        <div className="fixed inset-0 overflow-y-auto bg-[#f3f7fd]">
+          {children}
+        </div>
+      );
+    }
     return <>{children}</>;
   }
 
@@ -94,7 +168,7 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
 
   if (isAuthRoute) {
     return (
-      <div className="w-full h-full min-h-screen overflow-y-auto bg-[#f3f7fd]">
+      <div className="fixed inset-0 overflow-y-auto bg-[#f3f7fd]">
         {children}
       </div>
     );
@@ -346,6 +420,27 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
         {/* ========================================================================= */}
         <BottomNav />
       </div>
+
+      {showSessionExpired && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/60 backdrop-blur-md transition-all duration-300 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-gray-100 flex flex-col items-center text-center animate-slide-in">
+            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6 shadow-inner shadow-red-100/50">
+              <Lock className="w-8 h-8 text-red-500 animate-pulse" />
+            </div>
+            <h3 className="text-xl font-black text-gray-900 tracking-tight mb-2">Session Expired</h3>
+            <p className="text-sm text-gray-500 font-medium leading-relaxed mb-6">
+              Your security session has expired. To protect your investment dashboard, please sign in again.
+            </p>
+            <button
+              onClick={handleForceLogout}
+              className="w-full bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold py-3.5 px-6 rounded-2xl text-sm transition-all duration-200 shadow-lg shadow-red-500/25 flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02] active:scale-[0.98] select-none"
+            >
+              <span>Log Out &amp; Re-Authenticate</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
