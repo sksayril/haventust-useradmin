@@ -22,18 +22,9 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const activationPrice = await getActivationPrice();
-    if (isFreeActivation(activationPrice)) {
+    if (!isFreeActivation(activationPrice)) {
       return NextResponse.json(
-        { error: "Payment is not required. Your account will be activated automatically." },
-        { status: 400 }
-      );
-    }
-
-    const { screenshotUrl, transactionId } = await request.json();
-
-    if (!screenshotUrl || !transactionId) {
-      return NextResponse.json(
-        { error: "Screenshot and transaction ID are required." },
+        { error: "Account activation requires payment. Please submit your payment details." },
         { status: 400 }
       );
     }
@@ -43,14 +34,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found." }, { status: 404 });
     }
 
-    // Save payment details on user
-    user.paymentScreenshotUrl = screenshotUrl;
-    user.paymentTransactionId = transactionId.trim();
-    user.paymentSubmittedAt = new Date();
+    if (user.status === "Active") {
+      return NextResponse.json({
+        message: "Account is already active.",
+        user: {
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          referralCode: user.referralCode,
+          profilePicUrl: user.profilePicUrl,
+          walletBalance: user.walletBalance,
+          status: user.status,
+          joinedAt: user.createdAt,
+        },
+      });
+    }
+
+    if (user.status === "Suspended") {
+      return NextResponse.json({ error: "Your account is suspended." }, { status: 403 });
+    }
+
+    user.status = "Active";
     await user.save();
 
     return NextResponse.json({
-      message: "Payment details submitted successfully!",
+      message: "Account activated successfully!",
       user: {
         id: user._id.toString(),
         name: user.name,
@@ -60,12 +69,11 @@ export async function POST(request: NextRequest) {
         profilePicUrl: user.profilePicUrl,
         walletBalance: user.walletBalance,
         status: user.status,
-        paymentScreenshotUrl: user.paymentScreenshotUrl,
-        paymentTransactionId: user.paymentTransactionId,
-      }
+        joinedAt: user.createdAt,
+      },
     });
   } catch (error) {
-    console.error("Submit payment error:", error);
+    console.error("Activate free error:", error);
     return NextResponse.json({ error: "Invalid session or server error." }, { status: 401 });
   }
 }

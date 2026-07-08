@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
+import {
+  findIdentityConflict,
+  formatPhoneDisplay,
+  getDuplicateKeyMessage,
+  isValidIndianMobile,
+  normalizePhone,
+} from "@/lib/identity";
 
 interface JWTPayload {
   userId: string;
@@ -36,6 +43,11 @@ export async function GET(request: NextRequest) {
       dob: 1,
       address: 1,
       createdAt: 1,
+      panNumber: 1,
+      kycDocumentUrl: 1,
+      paymentScreenshotUrl: 1,
+      paymentTransactionId: 1,
+      paymentSubmittedAt: 1,
     }).lean();
 
     if (!user) {
@@ -60,7 +72,12 @@ export async function GET(request: NextRequest) {
         teamSalesVolume: user.teamSalesVolume || 0,
         dob: user.dob || "",
         address: user.address || "",
+        panNumber: user.panNumber || "",
+        kycDocumentUrl: user.kycDocumentUrl || null,
         joinedAt: user.createdAt,
+        paymentScreenshotUrl: user.paymentScreenshotUrl || null,
+        paymentTransactionId: user.paymentTransactionId || null,
+        paymentSubmittedAt: user.paymentSubmittedAt || null,
       },
     });
   } catch {
@@ -91,7 +108,28 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (name !== undefined) user.name = name;
-    if (phone !== undefined) user.phone = phone;
+
+    if (phone !== undefined) {
+      const phoneNormalized = normalizePhone(phone);
+      if (!phoneNormalized || !isValidIndianMobile(phoneNormalized)) {
+        return NextResponse.json(
+          { error: "Please enter a valid 10-digit Indian mobile number." },
+          { status: 400 }
+        );
+      }
+
+      const phoneConflict = await findIdentityConflict(User, {
+        phoneNormalized,
+        excludeUserId: user._id.toString(),
+      });
+      if (phoneConflict) {
+        return NextResponse.json({ error: phoneConflict }, { status: 409 });
+      }
+
+      user.phone = formatPhoneDisplay(phoneNormalized);
+      user.phoneNormalized = phoneNormalized;
+    }
+
     if (dob !== undefined) user.dob = dob;
     if (address !== undefined) user.address = address;
     if (profilePicUrl !== undefined) user.profilePicUrl = profilePicUrl;
@@ -116,6 +154,10 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (error) {
     console.error("PATCH profile error:", error);
+    const duplicateMessage = getDuplicateKeyMessage(error);
+    if (duplicateMessage) {
+      return NextResponse.json({ error: duplicateMessage }, { status: 409 });
+    }
     return NextResponse.json({ error: "Failed to update profile." }, { status: 500 });
   }
 }

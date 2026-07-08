@@ -16,6 +16,8 @@ import {
   Gift,
   AlertCircle,
   CheckCircle,
+  CreditCard,
+  FileText,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -127,6 +129,7 @@ function SignupForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [panNumber, setPanNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [referralCode, setReferralCode] = useState(searchParams.get("ref") || "");
@@ -136,6 +139,8 @@ function SignupForm() {
   // Profile picture
   const [profileFile, setProfileFile] = useState<File | null>(null);
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
+  const [kycDocumentFile, setKycDocumentFile] = useState<File | null>(null);
+  const [kycDocumentName, setKycDocumentName] = useState("");
 
   // Toast
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -167,10 +172,41 @@ function SignupForm() {
       showToast("Referral code is required.", "error");
       return;
     }
+    if (!panNumber.trim()) {
+      showToast("PAN card number is required.", "error");
+      return;
+    }
+    if (!/^[A-Za-z]{5}[0-9]{4}[A-Za-z]$/.test(panNumber.trim().replace(/\s/g, ""))) {
+      showToast("Please enter a valid PAN card number (e.g. ABCDE1234F).", "error");
+      return;
+    }
 
     setIsLoading(true);
 
     try {
+      let kycDocumentUrl: string | null = null;
+
+      if (kycDocumentFile) {
+        const kycFormData = new FormData();
+        kycFormData.append("file", kycDocumentFile);
+        kycFormData.append("folder", "kyc");
+
+        const kycUploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: kycFormData,
+        });
+
+        if (!kycUploadRes.ok) {
+          const kycUploadData = await kycUploadRes.json();
+          showToast(kycUploadData.error || "Failed to upload KYC document.", "error");
+          setIsLoading(false);
+          return;
+        }
+
+        const kycUploadData = await kycUploadRes.json();
+        kycDocumentUrl = kycUploadData.url;
+      }
+
       // Step 1: Register user
       const signupRes = await fetch("/api/auth/signup", {
         method: "POST",
@@ -179,6 +215,8 @@ function SignupForm() {
           name: fullName,
           email,
           phone,
+          panNumber: panNumber.trim().toUpperCase(),
+          kycDocumentUrl,
           password,
           referralCode: referralCode.trim().toUpperCase(),
         }),
@@ -298,6 +336,7 @@ function SignupForm() {
             />
             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           </div>
+          <p className="text-[10px] text-gray-400 mt-1">One email address can only be used for one account.</p>
         </div>
 
         {/* Phone */}
@@ -307,13 +346,61 @@ function SignupForm() {
             <input
               type="tel"
               required
-              placeholder="+91 98765 43210"
+              placeholder="9876543210"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => setPhone(e.target.value.replace(/[^\d+\s-]/g, ""))}
               className="w-full bg-[#f8fafc] text-sm text-gray-800 pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 focus:bg-white focus:border-[#0a56e3] focus:outline-none transition-all duration-200"
             />
             <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           </div>
+          <p className="text-[10px] text-gray-400 mt-1">One mobile number can only be used for one account.</p>
+        </div>
+
+        {/* PAN Card */}
+        <div>
+          <label className="text-xs font-bold text-gray-700 block mb-1.5">
+            PAN Card Number <span className="text-red-500 font-bold">*</span>
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              required
+              placeholder="ABCDE1234F"
+              value={panNumber}
+              onChange={(e) => setPanNumber(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))}
+              maxLength={10}
+              className="w-full bg-[#f8fafc] text-sm text-gray-800 pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 focus:bg-white focus:border-[#0a56e3] focus:outline-none transition-all duration-200 uppercase tracking-widest font-bold"
+            />
+            <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          </div>
+          <p className="text-[10px] text-gray-400 mt-1">Each PAN card can only be linked to one account.</p>
+        </div>
+
+        {/* KYC Document */}
+        <div>
+          <label className="text-xs font-bold text-gray-700 block mb-1.5">PAN / ID Document (Optional)</label>
+          <label className="border-2 border-dashed border-gray-200 hover:border-[#0a56e3] hover:bg-blue-50/20 rounded-xl py-4 px-4 flex flex-col items-center justify-center cursor-pointer transition-all">
+            <input
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (file.size > 5 * 1024 * 1024) {
+                  showToast("Document must be under 5MB.", "error");
+                  return;
+                }
+                setKycDocumentFile(file);
+                setKycDocumentName(file.name);
+              }}
+            />
+            <FileText className="w-5 h-5 text-gray-400 mb-1" />
+            <span className="text-xs font-bold text-gray-700">
+              {kycDocumentName || "Upload PAN card or ID proof"}
+            </span>
+            <span className="text-[10px] text-gray-400 mt-1">JPG, PNG or WEBP up to 5MB</span>
+          </label>
         </div>
 
         {/* Passwords row */}

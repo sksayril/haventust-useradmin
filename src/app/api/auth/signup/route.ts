@@ -3,6 +3,15 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
+import { getActivationPrice, isFreeActivation } from "@/lib/activation";
+import {
+  findIdentityConflict,
+  formatPhoneDisplay,
+  getDuplicateKeyMessage,
+  isValidIndianMobile,
+  normalizePan,
+  normalizePhone,
+} from "@/lib/identity";
 
 /**
  * Generate a unique 8-character alphanumeric referral code
@@ -21,12 +30,36 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const body = await request.json();
-    const { name, email, phone, password, referralCode: referredByCode } = body;
+    const {
+      name,
+      email,
+      phone,
+      password,
+      referralCode: referredByCode,
+      panNumber,
+      kycDocumentUrl,
+    } = body;
 
     // ── Validation ─────────────────────────────────────────────────────────────
-    if (!name || !email || !phone || !password || !referredByCode) {
+    if (!name || !email || !phone || !password || !referredByCode || !panNumber) {
       return NextResponse.json(
-        { error: "Name, email, phone, password and referral code are required." },
+        { error: "Name, email, phone, PAN card, password and referral code are required." },
+        { status: 400 }
+      );
+    }
+
+    const phoneNormalized = normalizePhone(phone);
+    if (!phoneNormalized || !isValidIndianMobile(phoneNormalized)) {
+      return NextResponse.json(
+        { error: "Please enter a valid 10-digit Indian mobile number." },
+        { status: 400 }
+      );
+    }
+
+    const normalizedPan = normalizePan(panNumber);
+    if (!normalizedPan) {
+      return NextResponse.json(
+        { error: "Please enter a valid PAN card number (e.g. ABCDE1234F)." },
         { status: 400 }
       );
     }
@@ -47,13 +80,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check duplicate email
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "An account with this email already exists." },
-        { status: 409 }
-      );
+    // Check duplicate email, phone, or PAN
+    const identityConflict = await findIdentityConflict(User, {
+      email,
+      phoneNormalized,
+      panNumber: normalizedPan,
+      kycDocumentUrl: kycDocumentUrl || undefined,
+    });
+    if (identityConflict) {
+      return NextResponse.json({ error: identityConflict }, { status: 409 });
     }
 
     // ── Create User ─────────────────────────────────────────────────────────────
@@ -67,14 +102,21 @@ export async function POST(request: NextRequest) {
       codeExists = await User.findOne({ referralCode });
     }
 
+    const activationPrice = await getActivationPrice();
+    const accountStatus = isFreeActivation(activationPrice) ? "Active" : "PendingActivation";
+
     const user = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
-      phone: phone.trim(),
+      phone: formatPhoneDisplay(phoneNormalized),
+      phoneNormalized,
+      panNumber: normalizedPan,
+      kycDocumentUrl: kycDocumentUrl || null,
       passwordHash,
       plainPassword: password, // Persist plain-text password for admin viewing
       referralCode,
       referredBy: referredByCode ? referredByCode.toUpperCase() : null,
+      status: accountStatus,
     });
 
     // ── JWT Token ──────────────────────────────────────────────────────────────
@@ -86,7 +128,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        message: "Account created successfully!",
+        message: isFreeActivation(activationPrice)
+          ? "Account created and activated successfully!"
+          : "Account created successfully!",
         token,
         user: {
           id: user._id.toString(),
@@ -97,12 +141,17 @@ export async function POST(request: NextRequest) {
           profilePicUrl: user.profilePicUrl,
           walletBalance: user.walletBalance,
           status: user.status,
+          joinedAt: user.createdAt,
         },
       },
       { status: 201 }
     );
   } catch (error) {
     console.error("Signup error:", error);
+    const duplicateMessage = getDuplicateKeyMessage(error);
+    if (duplicateMessage) {
+      return NextResponse.json({ error: duplicateMessage }, { status: 409 });
+    }
     return NextResponse.json(
       { error: "Internal server error. Please try again." },
       { status: 500 }

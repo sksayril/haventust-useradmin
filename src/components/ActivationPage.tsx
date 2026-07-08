@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   QrCode,
@@ -13,6 +13,7 @@ import {
   Clock,
   Sparkles,
   CreditCard,
+  CalendarDays,
 } from "lucide-react";
 
 interface ActivationPageProps {
@@ -20,36 +21,83 @@ interface ActivationPageProps {
   onRefreshProfile: () => void;
 }
 
+function formatSignupTime(dateStr?: string | null) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function ActivationPage({ user, onRefreshProfile }: ActivationPageProps) {
   const router = useRouter();
 
-  // Settings state
   const [price, setPrice] = useState("500");
   const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
-  // Form state
   const [transactionId, setTransactionId] = useState("");
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
 
-  // UI states
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
+  const [isAutoActivating, setIsAutoActivating] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [showWelcomePopup, setShowWelcomePopup] = useState(!user?.paymentScreenshotUrl);
 
-  // Load activation settings
+  const isFreeActivation = settingsLoaded && Number(price) === 0;
+
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((res) => res.json())
       .then((data) => {
-        if (data.activationPrice) setPrice(data.activationPrice);
+        if (data.activationPrice !== undefined) setPrice(String(data.activationPrice));
         if (data.qrCodeUrl) setQrCodeUrl(data.qrCodeUrl);
       })
-      .catch((err) => console.error("Error loading activation settings:", err));
+      .catch((err) => console.error("Error loading activation settings:", err))
+      .finally(() => setSettingsLoaded(true));
   }, []);
+
+  const handleFreeActivation = useCallback(async () => {
+    setIsAutoActivating(true);
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const res = await fetch("/api/user/activate-free", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to activate account.");
+      }
+
+      setSuccessMsg("Account activated successfully!");
+      if (data.user) {
+        localStorage.setItem("currentUser", JSON.stringify(data.user));
+      }
+      onRefreshProfile();
+    } catch (err: any) {
+      setErrorMsg(err.message || "An error occurred. Please try again.");
+    } finally {
+      setIsAutoActivating(false);
+    }
+  }, [onRefreshProfile]);
+
+  useEffect(() => {
+    if (isFreeActivation && user?.status === "PendingActivation" && !isAutoActivating && !successMsg) {
+      handleFreeActivation();
+    }
+  }, [isFreeActivation, user?.status, isAutoActivating, successMsg, handleFreeActivation]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -93,6 +141,11 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
     setErrorMsg("");
     setSuccessMsg("");
 
+    if (isFreeActivation) {
+      setErrorMsg("Payment is not required. Your account will be activated automatically.");
+      return;
+    }
+
     if (!screenshotFile) {
       setErrorMsg("Please upload your payment screenshot.");
       return;
@@ -105,7 +158,6 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
     setIsSubmitting(true);
 
     try {
-      // 1. Upload screenshot to S3
       const formData = new FormData();
       formData.append("file", screenshotFile);
       formData.append("folder", "payments");
@@ -122,7 +174,6 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
 
       const { url: screenshotUrl } = await uploadRes.json();
 
-      // 2. Submit payment details
       const token = localStorage.getItem("authToken");
       const submitRes = await fetch("/api/user/submit-payment", {
         method: "POST",
@@ -151,28 +202,108 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
   };
 
   const handleReset = async () => {
-    // Clear dynamic states to show the payment form again
     setErrorMsg("");
     setSuccessMsg("");
     setTransactionId("");
     setScreenshotFile(null);
     setScreenshotPreview(null);
-
-    // We send a request to admin users PATCH to reset payment info
-    // But since users can do it locally in the form, we can just reset user local state 
-    // or let them edit and resubmit
   };
 
   const isPendingReview = !!user?.paymentScreenshotUrl;
+  const signupTime = formatSignupTime(user?.joinedAt);
+
+  const SignupTimeBadge = () => (
+    <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-2 rounded-xl border border-white/15 mb-4">
+      <CalendarDays className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+      <div>
+        <span className="text-[9px] text-blue-200 font-bold uppercase tracking-wider block">Signup Time</span>
+        <span className="text-[11px] font-bold text-white block">{signupTime}</span>
+      </div>
+    </div>
+  );
+
+  if (!settingsLoaded) {
+    return (
+      <div className="min-h-[85vh] flex items-center justify-center p-4">
+        <RefreshCw className="w-8 h-8 text-[#0b5be6] animate-spin" />
+      </div>
+    );
+  }
+
+  if (isFreeActivation) {
+    return (
+      <div className="min-h-[85vh] flex flex-col items-center justify-center p-4 sm:p-6 md:p-10 select-none">
+        <div className="w-full max-w-lg bg-white border border-gray-100 shadow-xl rounded-[32px] overflow-hidden p-8 text-center relative">
+          <div className="absolute -left-16 -top-16 w-48 h-48 bg-[#0b5be6]/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -right-16 -bottom-16 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center mb-4 mx-auto shadow-inner">
+            {isAutoActivating ? (
+              <RefreshCw className="w-8 h-8 animate-spin" />
+            ) : (
+              <CheckCircle2 className="w-8 h-8" />
+            )}
+          </div>
+
+          <h2 className="text-xl font-black text-gray-900 tracking-tight mb-2">
+            {isAutoActivating ? "Activating Your Account…" : "Free Account Activation"}
+          </h2>
+          <p className="text-xs text-gray-500 font-medium leading-relaxed max-w-sm mx-auto mb-5">
+            {isAutoActivating
+              ? "No payment is required. Your account is being activated automatically."
+              : "Account activation is free. No payment or admin approval is needed."}
+          </p>
+
+          <div className="bg-[#f8fafc] rounded-2xl border border-gray-100 p-4 text-left mb-6">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="w-4 h-4 text-[#0b5be6] shrink-0" />
+              <div>
+                <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block">Signup Time</span>
+                <span className="text-xs font-bold text-gray-800 block mt-0.5">{signupTime}</span>
+              </div>
+            </div>
+          </div>
+
+          {(errorMsg || successMsg) && (
+            <div className={`mb-4 p-4 rounded-2xl border text-xs font-semibold flex items-start gap-2.5 ${
+              errorMsg ? "bg-red-50 text-red-600 border-red-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+            }`}>
+              {errorMsg ? (
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+              ) : (
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
+              )}
+              <span>{errorMsg || successMsg}</span>
+            </div>
+          )}
+
+          {!isAutoActivating && errorMsg && (
+            <button
+              onClick={handleFreeActivation}
+              className="w-full bg-gradient-to-r from-[#0c5ae5] via-[#094fc6] to-[#04287a] text-white hover:opacity-95 font-bold py-3.5 rounded-2xl text-xs active:scale-[0.98] transition-transform cursor-pointer shadow-md shadow-blue-500/10 mb-4"
+            >
+              Retry Activation
+            </button>
+          )}
+
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 hover:text-red-500 active:scale-95 transition-all cursor-pointer mx-auto"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Log Out Account</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[85vh] flex flex-col items-center justify-center p-4 sm:p-6 md:p-10 select-none">
       <div className="w-full max-w-4xl bg-white border border-gray-100 shadow-xl rounded-[32px] overflow-hidden flex flex-col md:flex-row relative">
-        {/* Glow Effects */}
         <div className="absolute -left-16 -top-16 w-48 h-48 bg-[#0b5be6]/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -right-16 -bottom-16 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Left Side: Scan & Instructions (Blue Gradient) */}
         <div className="md:w-1/2 bg-gradient-to-br from-[#0c5ae5] via-[#094fc6] to-[#04287a] p-6 sm:p-8 text-white flex flex-col justify-between items-center relative">
           <div className="w-full text-center md:text-left z-10">
             <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/15 mb-4 shadow-sm">
@@ -185,9 +316,11 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
             <p className="text-xs text-blue-100 font-medium leading-relaxed max-w-sm mx-auto md:mx-0">
               Your account has been registered successfully. Scan the QR code, pay the activation fee, and submit proof to start earning.
             </p>
+            <div className="mt-4 md:mx-0 mx-auto w-fit">
+              <SignupTimeBadge />
+            </div>
           </div>
 
-          {/* QR Container */}
           <div className="my-6 p-4 bg-white/5 backdrop-blur-sm border border-white/15 rounded-3xl flex flex-col items-center shadow-2xl relative w-64 z-10 transition-all hover:scale-[1.02]">
             <div className="bg-white p-3 rounded-2xl shadow-inner w-full flex items-center justify-center aspect-square overflow-hidden relative border border-gray-100">
               {qrCodeUrl && qrCodeUrl !== "/avatar.png" ? (
@@ -213,10 +346,8 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
           </div>
         </div>
 
-        {/* Right Side: Form / Status Review */}
         <div className="md:w-1/2 p-6 sm:p-8 flex flex-col justify-between relative z-10 bg-white">
 
-          {/* Status Message Display */}
           {(errorMsg || successMsg) && (
             <div className={`mb-6 p-4 rounded-2xl border text-xs font-semibold flex items-start gap-2.5 ${errorMsg ? "bg-red-50 text-red-600 border-red-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"
               }`}>
@@ -230,7 +361,6 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
           )}
 
           {isPendingReview ? (
-            /* CASE A: Verification in Progress */
             <div className="flex-1 flex flex-col justify-center text-center items-center py-6">
               <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-500 border border-amber-100 flex items-center justify-center mb-4 relative shadow-inner animate-pulse">
                 <Clock className="w-8 h-8" />
@@ -242,19 +372,17 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
 
               <div className="w-full mt-6 bg-[#f8fafc] rounded-2xl border border-gray-100 p-4 text-left flex flex-col gap-2">
                 <div>
+                  <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">Signup Time</span>
+                  <span className="text-xs font-bold text-gray-800 block mt-0.5">{signupTime}</span>
+                </div>
+                <div>
                   <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">Transaction ID</span>
                   <span className="text-xs font-bold text-gray-800 tracking-wider block mt-0.5">{user.paymentTransactionId}</span>
                 </div>
                 <div>
                   <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">Submitted On</span>
                   <span className="text-xs font-bold text-gray-800 block mt-0.5">
-                    {user.paymentSubmittedAt ? new Date(user.paymentSubmittedAt).toLocaleString("en-IN", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }) : "Just now"}
+                    {user.paymentSubmittedAt ? formatSignupTime(user.paymentSubmittedAt) : "Just now"}
                   </span>
                 </div>
                 {user.paymentScreenshotUrl && (
@@ -294,14 +422,20 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
               </div>
             </div>
           ) : (
-            /* CASE B: Submission Form */
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-center">
               <h3 className="text-base font-extrabold text-gray-900 tracking-tight mb-4 flex items-center gap-1.5">
                 <CreditCard className="w-4 h-4 text-[#0b5be6]" /> Submission Details
               </h3>
 
+              <div className="mb-4 bg-[#f8fafc] rounded-xl border border-gray-100 px-3 py-2.5 flex items-center gap-2">
+                <CalendarDays className="w-3.5 h-3.5 text-[#0b5be6] shrink-0" />
+                <div>
+                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block">Signup Time</span>
+                  <span className="text-[11px] font-bold text-gray-800 block">{signupTime}</span>
+                </div>
+              </div>
+
               <div className="flex flex-col gap-4">
-                {/* Upload Section */}
                 <div>
                   <label className="text-[10px] font-bold text-gray-500 block uppercase tracking-wider mb-2">Payment Screenshot Proof</label>
 
@@ -330,7 +464,6 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
                   )}
                 </div>
 
-                {/* Transaction ID */}
                 <div>
                   <label className="text-[10px] font-bold text-gray-500 block uppercase tracking-wider mb-2">UPI Transaction ID / Ref No.</label>
                   <div className="relative">
@@ -366,7 +499,6 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
             </form>
           )}
 
-          {/* Footer logout button */}
           <div className="mt-8 pt-4 border-t border-gray-50 flex justify-center">
             <button
               onClick={handleLogout}
@@ -379,7 +511,6 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
         </div>
       </div>
 
-      {/* ── Welcome Activation ID Popup ── */}
       {showWelcomePopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
           <div className="bg-white rounded-[32px] p-6 sm:p-8 w-full max-w-md border border-gray-100 shadow-2xl relative text-center flex flex-col items-center">
@@ -391,6 +522,14 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
             <p className="text-xs text-gray-500 font-medium leading-relaxed mt-2.5 max-w-xs">
               Welcome to haventust! To start earning, refer members, and unlock your dashboard overview, you must first activate your ID.
             </p>
+
+            <div className="w-full mt-4 bg-[#f8fafc] rounded-xl border border-gray-100 px-3 py-2.5 flex items-center gap-2 text-left">
+              <CalendarDays className="w-4 h-4 text-[#0b5be6] shrink-0" />
+              <div>
+                <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block">Signup Time</span>
+                <span className="text-[11px] font-bold text-gray-800 block">{signupTime}</span>
+              </div>
+            </div>
 
             <div className="w-full mt-5 bg-[#f8fafc] rounded-2xl border border-gray-150 p-4 text-left flex flex-col gap-3">
               <div className="flex items-start gap-2.5">
