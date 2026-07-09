@@ -9,7 +9,6 @@ import {
   formatPhoneDisplay,
   getDuplicateKeyMessage,
   isValidIndianMobile,
-  normalizePan,
   normalizePhone,
 } from "@/lib/identity";
 
@@ -30,20 +29,12 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const body = await request.json();
-    const {
-      name,
-      email,
-      phone,
-      password,
-      referralCode: referredByCode,
-      panNumber,
-      kycDocumentUrl,
-    } = body;
+    const { name, email, phone, password, referralCode: referredByCode } = body;
 
     // ── Validation ─────────────────────────────────────────────────────────────
-    if (!name || !email || !phone || !password || !referredByCode || !panNumber) {
+    if (!name || !email || !phone || !password || !referredByCode) {
       return NextResponse.json(
-        { error: "Name, email, phone, PAN card, password and referral code are required." },
+        { error: "Name, email, phone, password and referral code are required." },
         { status: 400 }
       );
     }
@@ -52,14 +43,6 @@ export async function POST(request: NextRequest) {
     if (!phoneNormalized || !isValidIndianMobile(phoneNormalized)) {
       return NextResponse.json(
         { error: "Please enter a valid 10-digit Indian mobile number." },
-        { status: 400 }
-      );
-    }
-
-    const normalizedPan = normalizePan(panNumber);
-    if (!normalizedPan) {
-      return NextResponse.json(
-        { error: "Please enter a valid PAN card number (e.g. ABCDE1234F)." },
         { status: 400 }
       );
     }
@@ -80,12 +63,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check duplicate email, phone, or PAN
+    // Check duplicate email or phone
     const identityConflict = await findIdentityConflict(User, {
       email,
       phoneNormalized,
-      panNumber: normalizedPan,
-      kycDocumentUrl: kycDocumentUrl || undefined,
     });
     if (identityConflict) {
       return NextResponse.json({ error: identityConflict }, { status: 409 });
@@ -110,8 +91,6 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase().trim(),
       phone: formatPhoneDisplay(phoneNormalized),
       phoneNormalized,
-      panNumber: normalizedPan,
-      kycDocumentUrl: kycDocumentUrl || null,
       passwordHash,
       plainPassword: password, // Persist plain-text password for admin viewing
       referralCode,
@@ -141,7 +120,6 @@ export async function POST(request: NextRequest) {
           profilePicUrl: user.profilePicUrl,
           walletBalance: user.walletBalance,
           status: user.status,
-          joinedAt: user.createdAt,
         },
       },
       { status: 201 }

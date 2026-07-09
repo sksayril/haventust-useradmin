@@ -29,8 +29,6 @@ export async function GET(request: NextRequest) {
       paymentTransactionId: 1,
       paymentSubmittedAt: 1,
       plainPassword: 1,
-      panNumber: 1,
-      kycDocumentUrl: 1,
       createdAt: 1,
     }).sort({ createdAt: -1 }).lean();
 
@@ -57,8 +55,6 @@ export async function GET(request: NextRequest) {
       paymentScreenshotUrl: u.paymentScreenshotUrl,
       paymentTransactionId: u.paymentTransactionId,
       paymentSubmittedAt: u.paymentSubmittedAt ? new Date(u.paymentSubmittedAt).toISOString() : null,
-      panNumber: u.panNumber || "—",
-      kycDocumentUrl: u.kycDocumentUrl || null,
       plainPassword: u.plainPassword || "N/A",
       referrals: referralMap[u.referralCode] || 0,
       joined: new Date(u.createdAt).toLocaleDateString("en-IN", {

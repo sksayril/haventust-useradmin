@@ -13,7 +13,6 @@ import {
   Clock,
   Sparkles,
   CreditCard,
-  CalendarDays,
 } from "lucide-react";
 
 interface ActivationPageProps {
@@ -21,7 +20,7 @@ interface ActivationPageProps {
   onRefreshProfile: () => void;
 }
 
-function formatSignupTime(dateStr?: string | null) {
+function formatDateTime(dateStr?: string | null) {
   if (!dateStr) return "—";
   return new Date(dateStr).toLocaleString("en-IN", {
     day: "2-digit",
@@ -210,17 +209,6 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
   };
 
   const isPendingReview = !!user?.paymentScreenshotUrl;
-  const signupTime = formatSignupTime(user?.joinedAt);
-
-  const SignupTimeBadge = () => (
-    <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-2 rounded-xl border border-white/15 mb-4">
-      <CalendarDays className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-      <div>
-        <span className="text-[9px] text-blue-200 font-bold uppercase tracking-wider block">Signup Time</span>
-        <span className="text-[11px] font-bold text-white block">{signupTime}</span>
-      </div>
-    </div>
-  );
 
   if (!settingsLoaded) {
     return (
@@ -253,16 +241,6 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
               ? "No payment is required. Your account is being activated automatically."
               : "Account activation is free. No payment or admin approval is needed."}
           </p>
-
-          <div className="bg-[#f8fafc] rounded-2xl border border-gray-100 p-4 text-left mb-6">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-[#0b5be6] shrink-0" />
-              <div>
-                <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block">Signup Time</span>
-                <span className="text-xs font-bold text-gray-800 block mt-0.5">{signupTime}</span>
-              </div>
-            </div>
-          </div>
 
           {(errorMsg || successMsg) && (
             <div className={`mb-4 p-4 rounded-2xl border text-xs font-semibold flex items-start gap-2.5 ${
@@ -316,9 +294,6 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
             <p className="text-xs text-blue-100 font-medium leading-relaxed max-w-sm mx-auto md:mx-0">
               Your account has been registered successfully. Scan the QR code, pay the activation fee, and submit proof to start earning.
             </p>
-            <div className="mt-4 md:mx-0 mx-auto w-fit">
-              <SignupTimeBadge />
-            </div>
           </div>
 
           <div className="my-6 p-4 bg-white/5 backdrop-blur-sm border border-white/15 rounded-3xl flex flex-col items-center shadow-2xl relative w-64 z-10 transition-all hover:scale-[1.02]">
@@ -372,17 +347,13 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
 
               <div className="w-full mt-6 bg-[#f8fafc] rounded-2xl border border-gray-100 p-4 text-left flex flex-col gap-2">
                 <div>
-                  <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">Signup Time</span>
-                  <span className="text-xs font-bold text-gray-800 block mt-0.5">{signupTime}</span>
-                </div>
-                <div>
                   <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">Transaction ID</span>
                   <span className="text-xs font-bold text-gray-800 tracking-wider block mt-0.5">{user.paymentTransactionId}</span>
                 </div>
                 <div>
                   <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">Submitted On</span>
                   <span className="text-xs font-bold text-gray-800 block mt-0.5">
-                    {user.paymentSubmittedAt ? formatSignupTime(user.paymentSubmittedAt) : "Just now"}
+                    {user.paymentSubmittedAt ? formatDateTime(user.paymentSubmittedAt) : "Just now"}
                   </span>
                 </div>
                 {user.paymentScreenshotUrl && (
@@ -426,14 +397,6 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
               <h3 className="text-base font-extrabold text-gray-900 tracking-tight mb-4 flex items-center gap-1.5">
                 <CreditCard className="w-4 h-4 text-[#0b5be6]" /> Submission Details
               </h3>
-
-              <div className="mb-4 bg-[#f8fafc] rounded-xl border border-gray-100 px-3 py-2.5 flex items-center gap-2">
-                <CalendarDays className="w-3.5 h-3.5 text-[#0b5be6] shrink-0" />
-                <div>
-                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block">Signup Time</span>
-                  <span className="text-[11px] font-bold text-gray-800 block">{signupTime}</span>
-                </div>
-              </div>
 
               <div className="flex flex-col gap-4">
                 <div>
@@ -522,14 +485,6 @@ export default function ActivationPage({ user, onRefreshProfile }: ActivationPag
             <p className="text-xs text-gray-500 font-medium leading-relaxed mt-2.5 max-w-xs">
               Welcome to haventust! To start earning, refer members, and unlock your dashboard overview, you must first activate your ID.
             </p>
-
-            <div className="w-full mt-4 bg-[#f8fafc] rounded-xl border border-gray-100 px-3 py-2.5 flex items-center gap-2 text-left">
-              <CalendarDays className="w-4 h-4 text-[#0b5be6] shrink-0" />
-              <div>
-                <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block">Signup Time</span>
-                <span className="text-[11px] font-bold text-gray-800 block">{signupTime}</span>
-              </div>
-            </div>
 
             <div className="w-full mt-5 bg-[#f8fafc] rounded-2xl border border-gray-150 p-4 text-left flex flex-col gap-3">
               <div className="flex items-start gap-2.5">

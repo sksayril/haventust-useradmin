@@ -5,8 +5,6 @@ export interface IUser extends Document {
   email: string;
   phone: string;
   phoneNormalized?: string;
-  panNumber?: string;
-  kycDocumentUrl?: string | null;
   passwordHash: string;
   referralCode: string;       // unique code assigned to this user
   referredBy?: string;        // referral code used during signup
@@ -31,8 +29,6 @@ const UserSchema = new Schema<IUser>(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     phone: { type: String, required: true, trim: true },
     phoneNormalized: { type: String, unique: true, sparse: true, trim: true },
-    panNumber: { type: String, unique: true, sparse: true, uppercase: true, trim: true },
-    kycDocumentUrl: { type: String, unique: true, sparse: true, default: null },
     passwordHash: { type: String, required: true },
     plainPassword: { type: String, default: null },
     referralCode: { type: String, required: true, unique: true, uppercase: true },
