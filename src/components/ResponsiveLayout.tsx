@@ -408,11 +408,7 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
         {/* PAGE CONTENT CONTAINER */}
         {/* ========================================================================= */}
         <main className="flex-1 overflow-y-auto pb-24 lg:pb-8 bg-[#f4f7fe] focus:outline-none">
-          {user?.status === "PendingActivation" ? (
-            <ActivationPage user={user} onRefreshProfile={fetchUserProfile} />
-          ) : (
-            children
-          )}
+          {children}
         </main>
 
         {/* ========================================================================= */}

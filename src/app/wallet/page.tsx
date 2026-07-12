@@ -21,8 +21,10 @@ import {
   ArrowDownLeft,
   Search,
   PlusCircle,
-  ShoppingBag
+  ShoppingBag,
+  Lock
 } from "lucide-react";
+import ActivationPage from "@/components/ActivationPage";
 
 interface Transaction {
   id: string;
@@ -54,8 +56,37 @@ export default function WalletPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [user, setUser] = useState<any>(null);
+  const [isActivationModalOpen, setIsActivationModalOpen] = useState(false);
+
+  const fetchUserProfile = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+    try {
+      const res = await fetch("/api/user/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          setUser(data.user);
+          localStorage.setItem("currentUser", JSON.stringify(data.user));
+        }
+      }
+    } catch (e) {
+      console.error("Error loading user profile:", e);
+    }
+  };
+
+  const handleActivationSuccess = () => {
+    fetchUserProfile();
+    fetchWalletData();
+    setIsActivationModalOpen(false);
+  };
+
   useEffect(() => {
     fetchWalletData();
+    fetchUserProfile();
   }, []);
 
   const fetchWalletData = async () => {
@@ -676,11 +707,54 @@ export default function WalletPage() {
                 </table>
               </div>
             </div>
-
           </div>
         </div>
-
       </div>
+
+      {/* ========================================================================= */}
+      {/* WALLET LOCK OVERLAY */}
+      {/* ========================================================================= */}
+      {user?.status === "PendingActivation" && (
+        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center p-6 bg-slate-900/65 backdrop-blur-md transition-all duration-300">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-150 flex flex-col items-center text-center animate-slide-in">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-6 shadow-inner shadow-amber-100/50">
+              <Lock className="w-8 h-8 text-amber-500 animate-pulse" />
+            </div>
+            <h3 className="text-xl font-black text-gray-900 tracking-tight mb-2">Wallet Locked</h3>
+            <p className="text-sm text-gray-500 font-medium leading-relaxed mb-6">
+              Your digital wallet is currently locked. Activate your Haventust console account to unlock deposits, withdrawals, and earning commission distributions.
+            </p>
+            <button
+              onClick={() => setIsActivationModalOpen(true)}
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-3.5 px-6 rounded-2xl text-sm transition-all duration-200 shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02] active:scale-[0.98] select-none"
+            >
+              <span>Unlock Wallet &amp; Activate Now</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* ACTIVATION MODAL POPUP */}
+      {/* ========================================================================= */}
+      {isActivationModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
+          <div className="relative bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-150 p-6 md:p-8">
+            <button
+              onClick={() => setIsActivationModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-extrabold text-xl p-2 z-50"
+            >
+              ✕
+            </button>
+            <ActivationPage
+              user={user}
+              onRefreshProfile={handleActivationSuccess}
+            />
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

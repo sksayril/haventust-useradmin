@@ -38,24 +38,8 @@ export default function BottomNav() {
             : pathname.startsWith(item.href);
         const Icon = item.icon;
 
-        // Check if item is locked
-        const isLocked = isPending && item.href !== "/";
-
-        if (isLocked) {
-          return (
-            <div
-              key={item.name}
-              className="flex flex-col items-center justify-center py-1 px-3 text-gray-300 cursor-not-allowed opacity-50 select-none relative"
-              title="Activate your account to unlock this tab"
-            >
-              <Icon className="w-5 h-5 mb-0.5" />
-              <span className="text-[9px] font-medium tracking-wide flex items-center gap-0.5">
-                {item.name}
-                <Lock className="w-2 h-2 text-gray-400 shrink-0" />
-              </span>
-            </div>
-          );
-        }
+        // Check if item should show a lock
+        const showLock = isPending && item.href === "/wallet";
 
         if (isActive) {
           return (
@@ -65,8 +49,9 @@ export default function BottomNav() {
               className="bg-[#0b5be6] text-white px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all duration-300 transform scale-100 select-none shadow-sm shadow-blue-500/20"
             >
               <Icon className="w-5 h-5" />
-              <span className="text-xs font-semibold tracking-wide whitespace-nowrap">
+              <span className="text-xs font-semibold tracking-wide whitespace-nowrap flex items-center gap-1">
                 {item.name}
+                {showLock && <Lock className="w-3 h-3 text-white shrink-0" />}
               </span>
             </Link>
           );
@@ -79,8 +64,9 @@ export default function BottomNav() {
             className="flex flex-col items-center justify-center py-1 px-3 text-gray-400 active:text-gray-600 transition-all select-none hover:text-gray-500"
           >
             <Icon className="w-5 h-5 mb-0.5" />
-            <span className="text-[9px] font-medium tracking-wide">
+            <span className="text-[9px] font-medium tracking-wide flex items-center gap-0.5">
               {item.name}
+              {showLock && <Lock className="w-2.5 h-2.5 text-gray-400 shrink-0" />}
             </span>
           </Link>
         );

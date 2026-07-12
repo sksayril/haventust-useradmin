@@ -87,24 +87,8 @@ export default function Sidebar({ onClose }: SidebarProps) {
               (item.href !== "/" && pathname.startsWith(item.href));
             const Icon = item.icon;
 
-            // Check if this menu item is locked
-            const isLocked = isPending && item.href !== "/" && item.href !== "/users/dashboard";
-
-            if (isLocked) {
-              return (
-                <div
-                  key={item.name}
-                  className="group flex items-center justify-between py-2.5 px-6 opacity-45 cursor-not-allowed text-blue-200 hover:text-blue-200 rounded-lg mx-4 select-none text-sm"
-                  title="Activate your account to unlock this tab"
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-5 h-5 shrink-0 text-blue-300" />
-                    <span>{item.name}</span>
-                  </div>
-                  <Lock className="w-3.5 h-3.5 text-blue-300 shrink-0" />
-                </div>
-              );
-            }
+            // Check if this menu item should show a lock icon next to it
+            const showLock = isPending && item.href === "/wallet";
 
             return (
               <Link
@@ -123,7 +107,8 @@ export default function Sidebar({ onClose }: SidebarProps) {
                   />
                   <span>{item.name}</span>
                 </div>
-                {item.badge && (
+                {showLock && <Lock className="w-3.5 h-3.5 text-blue-200 shrink-0" />}
+                {item.badge && !showLock && (
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? "bg-red-500 text-white" : "bg-orange-500 text-white"
                       }`}
